@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0f2a47">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://script.google.com https://script.googleusercontent.com; frame-src about: data:; base-uri 'none'; form-action 'none'">
+<title>Health Camp</title>
+<style>
+:root{
+  --ink:#0f2a47; --blue:#0055b3; --blue-d:#00418a; --blue-bg:#e8f1fc; --blue-line:#b9d3f2;
+  --teal:#0e7c86; --teal-bg:#e1f3f4; --violet:#6d3fc0; --violet-bg:#eee8fa;
+  --text:#14213d; --muted:#5b6b82; --line:#d9e2ee; --paper:#f3f6fa; --white:#fff;
+  --green:#15803d; --green-bg:#e7f6ec; --green-line:#a7dfba;
+  --amber:#b45309; --amber-bg:#fdf1d6; --amber-line:#f2d28a;
+  --red:#b91c1c; --red-bg:#fdecec; --red-line:#f1b4b4;
+  --r:12px; --r-sm:8px;
+  --font:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--font);font-size:15px;line-height:1.45;color:var(--text);background:var(--paper);min-height:100vh;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid #7fb2ee;outline-offset:2px}
+h1,h2,h3{line-height:1.2}
+
+/* ───────── full-page screens (connect / sign in / camp) ───────── */
+.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:linear-gradient(180deg,var(--ink) 0,var(--ink) 220px,var(--paper) 220px)}
+.sheet{width:100%;max-width:520px;background:var(--white);border-radius:16px;box-shadow:0 10px 40px rgba(15,42,71,.18);padding:28px 26px 24px}
+.sheet.wide{max-width:640px}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.brand .logo{background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px 8px;display:flex;align-items:center}
+.brand .logo img{height:40px;width:auto;display:block}
+.brand h1{font-size:19px;color:var(--ink)}
+.brand p{font-size:13px;color:var(--muted)}
+.sheet h2{font-size:17px;color:var(--ink);margin-bottom:4px}
+.sheet .sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+.sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.sec-tile{text-align:left;background:var(--white);border:2px solid var(--line);border-radius:var(--r);padding:12px 14px;transition:border-color .15s,background .15s}
+.sec-tile b{display:block;font-size:15px;color:var(--ink)}
+.sec-tile span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.sec-tile:hover{border-color:var(--blue-line)}
+.sec-tile[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-bg)}
+.sec-tile.admin{grid-column:span 2}
+.pin-wrap{margin-bottom:6px}
+.pin-wrap label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)}
+.pin-input{width:100%;font-size:28px;letter-spacing:.5em;text-align:center;padding:12px 10px 12px 18px;border:2px solid var(--line);border-radius:var(--r);background:#fafcff}
+.pin-input:focus{border-color:var(--blue);outline:none}
+.msg{min-height:20px;font-size:13px;margin:8px 0 10px}
+.msg.err{color:var(--red);font-weight:600}
+.msg.ok{color:var(--green);font-weight:600}
+.foot-links{display:flex;justify-content:space-between;gap:10px;margin-top:14px;font-size:12px;color:var(--muted)}
+.linkbtn{background:none;border:none;color:var(--blue);font-size:12px;text-decoration:underline;padding:2px}
+.camp-list{display:grid;gap:10px;margin-bottom:16px;max-height:52vh;overflow:auto}
+.camp-tile{text-align:left;background:#fff;border:2px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.camp-tile b{display:block;color:var(--ink)}
+.camp-tile span{font-size:13px;color:var(--muted)}
+.camp-tile:hover{border-color:var(--blue-line)}
+.camp-tile[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-bg)}
+
+/* ───────── app header ───────── */
+.hdr{background:var(--ink);color:#fff;display:flex;align-items:center;gap:14px;padding:10px 18px;padding-top:calc(10px + env(safe-area-inset-top,0px));flex-wrap:wrap}
+.hdr-logo{background:#fff;border-radius:8px;padding:3px 7px;display:flex;align-items:center;flex-shrink:0}
+.hdr-logo img{height:34px;width:auto;display:block}
+.hdr-main{flex:1;min-width:200px}
+.hdr-hosp{font-size:12px;color:#9db8d8}
+.hdr-camp{font-size:20px;font-weight:700;letter-spacing:.2px}
+.hdr-camp small{font-size:13px;font-weight:500;color:#b8cde6;margin-left:8px}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:600;background:#1d3d63;color:#cfe0f5;white-space:nowrap}
+.chip.ok{background:#14532d;color:#c9f2d6}
+.chip.bad{background:#7f1d1d;color:#ffd6d6}
+.chip.warn{background:#7a4a05;color:#ffe3a8}
+.chip.role{background:#fff;color:var(--ink)}
+.hbtn{background:transparent;border:1px solid #3d5f8a;color:#e2edfb;border-radius:var(--r-sm);padding:6px 12px;font-size:13px;font-weight:600}
+.hbtn:hover{background:#1d3d63}
+
+.banner{padding:9px 18px;font-size:13px;font-weight:600;text-align:center}
+.banner.test{background:repeating-linear-gradient(45deg,#fcd34d,#fcd34d 12px,#fde68a 12px,#fde68a 24px);color:#5b3a00}
+.banner.info{background:var(--blue-bg);color:var(--blue-d)}
+.banner.closed{background:#e9edf3;color:#334155;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.tag{font-style:normal;font-size:11px;font-weight:700;background:#e2e8f0;color:#475569;border-radius:999px;padding:1px 8px;margin-left:6px}
+.banner.warn{background:var(--amber-bg);color:var(--amber)}
+
+/* ───────── tabs ───────── */
+.tabs{display:flex;gap:2px;background:#fff;border-bottom:1px solid var(--line);padding:0 14px;overflow-x:auto}
+.tab{background:none;border:none;border-bottom:4px solid transparent;padding:13px 16px 10px;font-size:14px;font-weight:600;color:var(--muted);white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--blue)}
+.tab[data-tab="nurse"][aria-selected="true"]{border-bottom-color:var(--teal)}
+.tab[data-tab="mo"][aria-selected="true"]{border-bottom-color:var(--violet)}
+.tab[data-tab="print"][aria-selected="true"]{border-bottom-color:var(--muted)}
+.tab .cnt{display:inline-block;min-width:22px;text-align:center;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--paper);font-size:12px;color:var(--muted)}
+.tab[aria-selected="true"] .cnt{background:var(--blue-bg);color:var(--blue-d)}
+
+main{max-width:1240px;margin:0 auto;padding:18px 16px 60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px 18px 16px;margin-bottom:16px;border-top:4px solid var(--blue)}
+.card.teal{border-top-color:var(--teal)}
+.card.violet{border-top-color:var(--violet)}
+.card.slate{border-top-color:#64748b}
+.card.plain{border-top-color:var(--line)}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.card-head h2{font-size:17px;color:var(--ink)}
+.station{font-size:12px;font-weight:600;color:var(--blue-d);background:var(--blue-bg);border-radius:999px;padding:3px 11px}
+.card.teal .station{color:var(--teal);background:var(--teal-bg)}
+.card.violet .station{color:var(--violet);background:var(--violet-bg)}
+.editbar{background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber);border-radius:var(--r-sm);padding:8px 12px;font-size:13px;margin-bottom:12px}
+.alert{border-radius:var(--r-sm);padding:9px 12px;font-size:13px;font-weight:600;margin-bottom:12px;border:1px solid}
+.alert.err{background:var(--red-bg);color:var(--red);border-color:var(--red-line)}
+
+/* ───────── forms ───────── */
+.grid{display:grid;gap:12px;margin-bottom:12px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.span2{grid-column:span 2}
+.field label.lb{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:5px}
+.req{color:var(--red)}
+.field input[type=text],.field input[type=tel],.field input[type=number],.field input[type=date],.field select,.field textarea,.input{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--r-sm);background:#fff;font-size:15px;min-height:44px}
+.field textarea{min-height:84px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus,.input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,85,179,.12)}
+.field .err,.input.err{border-color:var(--red)!important;background:#fff8f8}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.seg{display:flex;border:1.5px solid var(--line);border-radius:var(--r-sm);overflow:hidden;min-height:44px}
+.seg label{flex:1;display:flex;border-right:1px solid var(--line);cursor:pointer;user-select:none;position:relative}
+.seg label:last-child{border-right:none}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{flex:1;display:block;text-align:center;padding:10px 6px;font-size:14px;font-weight:600;color:var(--muted)}
+.seg input:checked+span{background:var(--blue);color:#fff}
+.seg input:focus-visible+span{outline:3px solid #7fb2ee;outline-offset:-3px}
+.seg.err{border-color:var(--red)}
+.sdiv{font-size:14px;font-weight:700;color:var(--ink);margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:9px 20px;border:1.5px solid var(--line);border-radius:var(--r-sm);background:#fff;font-size:14px;font-weight:600;color:var(--ink);transition:background .12s}
+.btn:hover{background:var(--paper)}
+.btn:active{transform:scale(.98)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-d)}
+.btn-teal{background:var(--teal);border-color:var(--teal);color:#fff}
+.btn-teal:hover{background:#0b666e}
+.btn-violet{background:var(--violet);border-color:var(--violet);color:#fff}
+.btn-violet:hover{background:#5a32a3}
+.btn-green{background:var(--green);border-color:var(--green);color:#fff}
+.btn-green:hover{background:#106130}
+.btn-sm{min-height:36px;padding:5px 12px;font-size:13px}
+.btn-block{width:100%}
+
+.pt-chip{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;background:var(--ink);color:#fff;border-radius:var(--r);padding:12px 16px;margin-bottom:14px}
+.pt-chip .cno{font-size:22px;font-weight:700;margin-right:6px}
+.pt-chip .inf{font-size:12px;color:#a9c0de}
+.pt-chip .inf b{display:block;font-size:15px;color:#fff;font-weight:600}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:6px}
+.vcell{border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 11px;background:#fafcff}
+.vcell small{display:block;font-size:11px;color:var(--muted)}
+.vcell b{font-size:15px;color:var(--ink)}
+
+/* BMI */
+.bmi{margin:2px 0 6px}
+.bmi-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bmi-val{font-size:30px;font-weight:700;color:var(--ink)}
+.bmi-badge{border-radius:999px;padding:4px 13px;font-size:13px;font-weight:700;border:1px solid}
+.bmi-under{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-line)}
+.bmi-normal{background:var(--green-bg);color:var(--green);border-color:var(--green-line)}
+.bmi-over{background:#fff1e3;color:#c2410c;border-color:#f7c99b}
+.bmi-obese{background:var(--red-bg);color:var(--red);border-color:var(--red-line)}
+.bmi-bar{height:8px;background:var(--paper);border-radius:4px;overflow:hidden;margin-top:8px}
+.bmi-bar i{display:block;height:100%;border-radius:4px;transition:width .35s,background .35s}
+
+/* tests */
+.checks{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.check{display:flex;align-items:center;gap:10px;min-height:46px;padding:8px 12px;border:1.5px solid var(--line);border-radius:var(--r-sm);cursor:pointer;font-size:14px;user-select:none}
+.check input{width:20px;height:20px;accent-color:var(--violet);flex-shrink:0}
+.check.on{border-color:var(--violet);background:var(--violet-bg);color:#4a2a8a;font-weight:600}
+
+/* triage */
+.triage{border:1.5px solid var(--line);border-radius:var(--r);padding:14px;background:#fcfdff;margin-top:18px}
+.triage.err{border-color:var(--red);background:#fff8f8}
+.triage h3{font-size:15px;color:var(--ink);margin-bottom:10px}
+.triage h3 em{font-style:normal;color:var(--red);font-size:12px;margin-left:8px}
+.tri-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tri-btn{border:2px solid;border-radius:var(--r);padding:14px 10px;font-size:14px;font-weight:700;text-align:center;opacity:.88;transition:opacity .15s,transform .15s,box-shadow .15s;min-height:68px}
+.tri-btn small{display:block;font-weight:500;font-size:12px;margin-top:3px}
+.tri-btn:hover{opacity:1}
+.tri-btn[aria-pressed="true"]{opacity:1;transform:scale(1.02)}
+.tri-green{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.tri-green[aria-pressed="true"]{background:#d3f0dd;box-shadow:0 0 0 4px rgba(21,128,61,.18)}
+.tri-yellow{background:var(--amber-bg);border-color:#d97706;color:var(--amber)}
+.tri-yellow[aria-pressed="true"]{background:#fbe5a8;box-shadow:0 0 0 4px rgba(217,119,6,.2)}
+.tri-red{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.tri-red[aria-pressed="true"]{background:#fbd0d0;box-shadow:0 0 0 4px rgba(185,28,28,.18)}
+.tri-hint{font-size:13px;margin-top:10px;color:var(--muted);min-height:18px}
+
+/* lists */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.toolbar .input{flex:1;min-width:180px}
+.toolbar select.input{flex:0 0 auto;min-width:170px;width:auto}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-sm)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:#f6f9fd;text-align:left;padding:10px 12px;font-size:12px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid #edf1f7;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#f8fbff}
+td.name{font-weight:600;color:var(--ink)}
+td.empty{text-align:center;color:var(--muted);padding:26px}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;white-space:nowrap}
+.p-reg{background:var(--blue-bg);color:var(--blue-d)}
+.p-vit{background:var(--teal-bg);color:var(--teal)}
+.p-done{background:var(--green-bg);color:var(--green)}
+.p-green{background:var(--green-bg);color:var(--green)}
+.p-yellow{background:var(--amber-bg);color:var(--amber)}
+.p-red{background:var(--red-bg);color:var(--red)}
+.p-sync{background:var(--amber-bg);color:var(--amber)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.d-green{background:#16a34a}.d-yellow{background:#d97706}.d-red{background:#dc2626}
+.qbtns{display:flex;gap:6px;flex-wrap:wrap}
+.count-line{font-size:13px;color:var(--muted);margin:0 0 10px}
+
+/* dialog / lock / toast / print layer */
+.overlay{position:fixed;inset:0;background:rgba(15,42,71,.55);z-index:600;display:flex;align-items:center;justify-content:center;padding:16px}
+.dialog{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:460px;box-shadow:0 18px 60px rgba(0,0,0,.3)}
+.dialog h3{font-size:17px;color:var(--ink);margin-bottom:8px}
+.dialog p{font-size:14px;color:var(--text);margin-bottom:6px;white-space:pre-line}
+.dialog .btns{justify-content:flex-end}
+.infolist{font-size:13px;display:grid;grid-template-columns:130px 1fr;gap:6px 10px;margin:10px 0 4px}
+.infolist dt{color:var(--muted)}
+.infolist dd{font-weight:600;word-break:break-all}
+#lock{position:fixed;inset:0;z-index:400;background:var(--ink);display:flex;align-items:center;justify-content:center;padding:20px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);padding:11px 18px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:0 8px 28px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:700;max-width:92vw;text-align:center;background:var(--ink);color:#fff}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{background:var(--green)}#toast.warn{background:#92400e}#toast.err{background:var(--red)}
+#printlayer{position:fixed;inset:0;z-index:350;background:#e5e9f0;display:flex;flex-direction:column}
+#printlayer .bar{display:flex;gap:10px;align-items:center;padding:10px 16px;background:var(--ink);color:#fff;flex-wrap:wrap}
+#printlayer .bar span{flex:1;font-size:14px;font-weight:600}
+#printlayer iframe{flex:1;border:none;background:#fff;width:100%}
+#boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--paper);color:var(--muted);z-index:900}
+noscript{display:block;padding:30px;text-align:center;font-weight:600}
+
+@media(max-width:860px){.g4{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){
+  .g2,.g3,.g4{grid-template-columns:1fr}.span2{grid-column:auto}
+  .sec-grid{grid-template-columns:1fr}.sec-tile.admin{grid-column:auto}
+  .checks{grid-template-columns:1fr}.tri-row{grid-template-columns:1fr}
+  .hdr-camp{font-size:17px}.infolist{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{body>*{display:none!important}body::before{content:"Printing is available from the Print screen.";display:block;padding:30px;font-size:16px}}
+</style>
+</head>
+<body>
+<noscript>This app needs JavaScript. Please enable it in your browser settings.</noscript>
+<div id="boot">Loading Health Camp…</div>
+
+<!-- ═════════ 1. SETUP NEEDED (only shown if the Web app link was not pasted into this file) ═════════ -->
+<div id="screen-setup" class="screen" hidden>
+  <div class="sheet">
+    <div class="brand"><div class="logo"><img class="logo-img" alt=""></div><div><h1>Health Camp</h1><p>Setup needed</p></div></div>
+    <h2>This page is not connected yet</h2>
+    <p class="sub">The administrator must paste the Google Web app link into this page's file (the line <b>SCRIPT_URL</b> near the top of the script), and upload the file again.</p>
+  </div>
+</div>
+
+<!-- ═════════ 2. SIGN IN ═════════ -->
+<div id="screen-login" class="screen" hidden>
+  <div class="sheet wide">
+    <div class="brand"><div class="logo"><img class="logo-img" alt=""></div><div><h1 id="l-hosp">Health Camp</h1><p>Patient flow — sign in to your section</p></div></div>
+    <div class="sec-grid" id="l-secs"></div>
+    <div class="pin-wrap" id="l-pinbox" hidden>
+      <label for="l-pin">6-digit PIN for <span id="l-secname"></span></label>
+      <input id="l-pin" class="pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="••••••">
+    </div>
+    <div id="l-msg" class="msg"></div>
+    <button id="l-go" class="btn btn-primary btn-block" disabled>Sign in</button>
+    <div class="foot-links"><span id="l-ver"></span></div>
+  </div>
+</div>
+
+<!-- ═════════ 3. CHOOSE CAMP ═════════ -->
+<div id="screen-camp" class="screen" hidden>
+  <div class="sheet wide">
+    <div class="brand"><div class="logo"><img class="logo-img" alt=""></div><div><h1>Choose camp</h1><p id="k-who"></p></div></div>
+    <div class="camp-list" id="k-list"></div>
+    <div id="k-msg" class="msg"></div>
+    <div class="btns" style="margin-top:0"><button id="k-go" class="btn btn-primary" disabled>Continue</button><button id="k-back" class="btn">Back</button></div>
+  </div>
+</div>
+
+<!-- ═════════ 4. THE APP ═════════ -->
+<div id="app" hidden>
+  <header class="hdr">
+    <div class="hdr-logo"><img class="logo-img" alt=""></div>
+    <div class="hdr-main"><div class="hdr-hosp" id="h-hosp"></div><div class="hdr-camp" id="h-camp"></div></div>
+    <div class="hdr-right">
+      <span class="chip" id="chip-sync">Connecting…</span>
+      <span class="chip warn" id="chip-queue" hidden></span>
+      <span class="chip role" id="chip-role"></span>
+      <button class="hbtn" id="btn-info">Info</button>
+      <button class="hbtn" id="btn-lock">Lock</button>
+      <button class="hbtn" id="btn-out">Sign out</button>
+    </div>
+  </header>
+  <div class="banner test" id="ban-test" hidden>TEST MODE — this is not real patient data</div>
+  <div class="banner info" id="ban-ver" hidden>A new version of this page is available. Please refresh the page (pull down or press Ctrl+Shift+R).</div>
+  <div class="banner warn" id="ban-queue" hidden></div>
+  <div class="banner closed" id="ban-closed" hidden><b>Closed camp — viewing only</b><label for="v-date" style="margin-left:10px">Date</label><input type="date" id="v-date" class="input" style="width:auto;min-height:36px;padding:4px 10px"><button class="btn btn-sm" id="v-reload">Reload</button></div>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+
+  <main>
+    <!-- ───────── REGISTRATION ───────── -->
+    <section id="p-reg" hidden>
+      <div class="card" id="r-formcard">
+        <div class="card-head"><h2 id="r-title">Register a patient</h2><span class="station">Station 1 · Registration</span></div>
+        <div id="r-editbar" class="editbar" hidden></div>
+        <div id="r-alert" class="alert err" hidden></div>
+        <div class="grid g4">
+          <div class="field"><label class="lb" for="r-card">Card No <span class="req">*</span></label><input type="text" id="r-card" autocomplete="off" maxlength="40" placeholder="Any card number"></div>
+          <div class="field span2"><label class="lb" for="r-name">Patient name <span class="req">*</span></label><input type="text" id="r-name" autocomplete="off" maxlength="120" placeholder="Full name"></div>
+          <div class="field"><label class="lb" for="r-age">Age (years) <span class="req">*</span></label><input type="number" id="r-age" inputmode="numeric" min="1" max="120" placeholder="e.g. 45"></div>
+        </div>
+        <div class="grid g2">
+          <div class="field"><label class="lb">Gender <span class="req">*</span></label>
+            <div class="seg" id="r-gender"><label><input type="radio" name="r-gender" value="Male"><span>Male</span></label><label><input type="radio" name="r-gender" value="Female"><span>Female</span></label><label><input type="radio" name="r-gender" value="Other"><span>Other</span></label></div></div>
+          <div class="field"><label class="lb" for="r-mobile">Mobile no <span class="req">*</span></label><input type="tel" id="r-mobile" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="10-digit number"><div class="hint">10 digits, starting with 6, 7, 8 or 9</div></div>
+        </div>
+        <div class="btns"><button class="btn btn-primary" id="r-save">Register patient</button><button class="btn" id="r-clear">Clear</button><button class="btn" id="r-cancel" hidden>Cancel edit</button></div>
+      </div>
+      <div class="card plain">
+        <div class="card-head"><h2>Registered patients</h2><span class="count-line" id="r-count"></span></div>
+        <div class="toolbar"><input type="text" id="r-filter" class="input" placeholder="Filter by card no, name or mobile" autocomplete="off"></div>
+        <div class="tablewrap"><table><thead><tr><th>Card No</th><th>Name</th><th>Age</th><th>Gender</th><th>Mobile</th><th>Time</th><th>Status</th><th></th></tr></thead><tbody id="r-tbody"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ───────── NURSING ───────── -->
+    <section id="p-nurse" hidden>
+      <div class="card teal" id="n-form" hidden>
+        <div class="card-head"><h2>Enter vitals</h2><span class="station">Station 2 · Nursing</span></div>
+        <div id="n-chip"></div>
+        <div id="n-alert" class="alert err" hidden></div>
+        <div class="sdiv" style="margin-top:4px">Basic vitals</div>
+        <div class="grid g3">
+          <div class="field"><label class="lb" for="n-bp">Blood pressure (BP) <span class="req">*</span></label><input type="text" id="n-bp" autocomplete="off" placeholder="e.g. 120/80" maxlength="20"><div class="hint">Systolic/diastolic</div></div>
+          <div class="field"><label class="lb" for="n-pulse">Pulse (bpm) <span class="req">*</span></label><input type="number" id="n-pulse" inputmode="decimal" min="30" max="250" placeholder="e.g. 72"><div class="hint">Normal: 60–100</div></div>
+          <div class="field"><label class="lb" for="n-temp">Temperature (°F) <span class="req">*</span></label><input type="number" id="n-temp" inputmode="decimal" step="0.1" min="90" max="110" placeholder="e.g. 98.6"><div class="hint">Normal: 97–99</div></div>
+        </div>
+        <div class="grid g3">
+          <div class="field"><label class="lb" for="n-rbs">Random blood sugar (RBS) <span class="req">*</span></label><input type="text" id="n-rbs" autocomplete="off" maxlength="20" placeholder="e.g. 110"></div>
+          <div class="field"><label class="lb" for="n-height">Height (cm) <span class="req">*</span></label><input type="number" id="n-height" inputmode="decimal" min="50" max="250" placeholder="e.g. 165"></div>
+          <div class="field"><label class="lb" for="n-weight">Weight (kg) <span class="req">*</span></label><input type="number" id="n-weight" inputmode="decimal" step="0.1" min="1" max="300" placeholder="e.g. 70"></div>
+        </div>
+        <div class="bmi" id="n-bmi" hidden>
+          <div class="hint" style="margin:0 0 4px">BMI</div>
+          <div class="bmi-row"><div class="bmi-val" id="n-bmi-val"></div><div class="bmi-badge" id="n-bmi-badge"></div><div class="hint" id="n-bmi-range"></div></div>
+          <div class="bmi-bar"><i id="n-bmi-bar"></i></div>
+        </div>
+        <div class="btns"><button class="btn btn-teal" id="n-save">Save vitals</button><button class="btn" id="n-clear">Clear</button><button class="btn" id="n-close">Close</button></div>
+      </div>
+      <div class="card teal plain">
+        <div class="card-head"><h2>Patients</h2><span class="count-line" id="n-count"></span></div>
+        <div class="toolbar">
+          <input type="text" id="n-filter" class="input" placeholder="Filter by card no or name — press Enter to open" autocomplete="off">
+          <select id="n-status" class="input"><option value="">All patients</option><option value="registered">Waiting for vitals</option><option value="done">Vitals done</option></select>
+        </div>
+        <div class="tablewrap"><table><thead><tr><th>Card No</th><th>Name</th><th>Age</th><th>Gender</th><th>Mobile</th><th>BP</th><th>Pulse</th><th>Temp °F</th><th>RBS</th><th>BMI</th><th>Status</th><th></th></tr></thead><tbody id="n-tbody"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ───────── MEDICAL OFFICER ───────── -->
+    <section id="p-mo" hidden>
+      <div class="card violet" id="m-form" hidden>
+        <div class="card-head"><h2>Consultation</h2><span class="station">Station 3 · Medical Officer</span></div>
+        <div id="m-chip"></div>
+        <div class="vgrid" id="m-vitals"></div>
+        <div id="m-alert" class="alert err" hidden></div>
+
+        <div class="sdiv">Medical history</div>
+        <div class="grid g2">
+          <div class="field"><label class="lb" for="m-meds">Regular medication</label><textarea id="m-meds" maxlength="1000" placeholder="Current medicines and doses"></textarea></div>
+          <div class="field"><label class="lb" for="m-fp">Family physician</label><input type="text" id="m-fp" maxlength="120" autocomplete="off" placeholder="Doctor's name"></div>
+        </div>
+        <div class="grid g2">
+          <div class="field"><label class="lb" for="m-surgery">Past surgery / major illness</label><input type="text" id="m-surgery" maxlength="300" autocomplete="off" placeholder="Leave blank if none"></div>
+          <div class="field"><label class="lb" for="m-referral">Referral specialty</label>
+            <select id="m-referral"><option value="">None / not required</option><option>Bariatrics</option><option>Cardiology</option><option>Critical Care</option><option>ENT</option><option>General Surgery</option><option>GI Surgery</option><option>Gynaecology</option><option>Joint Replacement</option><option>Medicine (Physician)</option><option>Nephrology (without dialysis)</option><option>Neurology</option><option>Oncology</option><option>Ophthalmology</option><option>Orthopaedic</option><option>Urology</option></select></div>
+        </div>
+
+        <div class="sdiv">Tests and investigations required</div>
+        <div class="checks">
+          <label class="check"><input type="checkbox" id="m-hc"> Health checkup</label>
+          <label class="check"><input type="checkbox" id="m-bi"> Blood investigation</label>
+          <label class="check"><input type="checkbox" id="m-dp"> Diabetic profile</label>
+          <label class="check"><input type="checkbox" id="m-cp"> Cardiac profile</label>
+          <label class="check"><input type="checkbox" id="m-echo"> 2D Echo / TMT</label>
+          <label class="check"><input type="checkbox" id="m-vitamin"> Vitamin tests</label>
+        </div>
+        <div class="field" style="margin-top:12px"><label class="lb" for="m-bi-detail">Blood investigation details</label><input type="text" id="m-bi-detail" maxlength="300" autocomplete="off" placeholder="e.g. CBC, LFT, KFT, HbA1c, lipid profile"></div>
+        <div class="field" style="margin-top:12px"><label class="lb" for="m-remarks">Medical officer remarks</label><textarea id="m-remarks" maxlength="3000" placeholder="Clinical observations, advice, follow-up"></textarea></div>
+
+        <!-- TRIAGE — last section, directly above the Save button -->
+        <div class="triage" id="m-triage">
+          <h3>Triage <em>Required</em></h3>
+          <div class="tri-row">
+            <button type="button" class="tri-btn tri-green" data-tri="green" aria-pressed="false">Green<small>Healthy — no action needed</small></button>
+            <button type="button" class="tri-btn tri-yellow" data-tri="yellow" aria-pressed="false">Yellow<small>Moderate — monitor</small></button>
+            <button type="button" class="tri-btn tri-red" data-tri="red" aria-pressed="false">Red<small>Needs doctor consultation</small></button>
+          </div>
+          <div class="tri-hint" id="m-tri-hint">Select Green, Yellow or Red before saving.</div>
+        </div>
+
+        <div class="btns"><button class="btn btn-violet" id="m-save">Save consultation</button><button class="btn btn-green" id="m-print">Print summary</button><button class="btn" id="m-clear">Clear</button><button class="btn" id="m-close">Close</button></div>
+      </div>
+      <div class="card violet plain">
+        <div class="card-head"><h2>Patients with vitals</h2><span class="count-line" id="m-count"></span></div>
+        <div class="toolbar">
+          <input type="text" id="m-filter" class="input" placeholder="Filter by card no or name — press Enter to open" autocomplete="off">
+          <select id="m-status" class="input"><option value="">All patients</option><option value="vitals_done">Waiting for consultation</option><option value="consultation_done">Consultation done</option></select>
+        </div>
+        <div class="tablewrap"><table><thead><tr><th>Card No</th><th>Name</th><th>Age</th><th>Gender</th><th>BP</th><th>Pulse</th><th>Temp °F</th><th>RBS</th><th>BMI</th><th>Triage</th><th>Status</th><th></th></tr></thead><tbody id="m-tbody"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ───────── PRINT ───────── -->
+    <section id="p-print" hidden>
+      <div class="card slate plain">
+        <div class="card-head"><h2>Print patient summaries</h2><span class="station" style="background:#eef1f5;color:#475569">Print only</span></div>
+        <div class="grid g4" style="margin-bottom:6px">
+          <div class="field"><label class="lb" for="pr-date">Date</label><input type="date" id="pr-date"></div>
+          <div class="field"><label class="lb" for="pr-camp">Camp</label><select id="pr-camp"></select></div>
+          <div class="field"><label class="lb" for="pr-status">Show</label><select id="pr-status"><option value="pending_done">Consultation done, not printed</option><option value="pending">Not printed (any status)</option><option value="printed">Already printed</option><option value="all">Everyone</option></select></div>
+          <div class="field"><label class="lb" for="pr-filter">Search</label><input type="text" id="pr-filter" class="input" placeholder="Card no, name or mobile" autocomplete="off"></div>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-sm" id="pr-today">Today</button>
+          <button class="btn btn-sm" id="pr-yday">Yesterday</button>
+          <button class="btn btn-sm" id="pr-reload">Reload</button>
+          <span style="flex:1"></span>
+          <button class="btn btn-sm" id="pr-selall">Select all listed</button>
+          <button class="btn btn-primary btn-sm" id="pr-sel">Print selected (0)</button>
+          <button class="btn btn-green btn-sm" id="pr-all">Print all listed (0)</button>
+        </div>
+        <div class="count-line" id="pr-count"></div>
+        <div class="tablewrap"><table><thead><tr><th style="width:36px"></th><th>Card No</th><th>Name</th><th>Age / Gender</th><th>Mobile</th><th>Triage</th><th>Status</th><th>Printed</th><th></th></tr></thead><tbody id="pr-tbody"></tbody></table></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ═════════ LOCK SCREEN ═════════ -->
+<div id="lock" hidden>
+  <div class="sheet">
+    <div class="brand"><div class="logo"><img class="logo-img" alt=""></div><div><h1>Locked</h1><p id="lk-why"></p></div></div>
+    <div class="pin-wrap"><label for="lk-pin">6-digit PIN for <span id="lk-sec"></span></label><input id="lk-pin" class="pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="••••••"></div>
+    <div id="lk-msg" class="msg"></div>
+    <button id="lk-go" class="btn btn-primary btn-block">Unlock</button>
+    <div class="foot-links"><span></span><button id="lk-out" class="linkbtn">Sign out</button></div>
+  </div>
+</div>
+
+<!-- ═════════ DIALOG / TOAST / PRINT LAYER ═════════ -->
+<div id="dlg" class="overlay" hidden><div class="dialog" role="dialog" aria-modal="true"><h3 id="dlg-title"></h3><div id="dlg-body"></div><div class="btns"><button class="btn" id="dlg-no"></button><button class="btn btn-primary" id="dlg-yes"></button></div></div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="printlayer" hidden><div class="bar"><span id="pl-title"></span><button class="btn btn-green btn-sm" id="pl-print">Print / Save PDF</button><button class="btn btn-sm" id="pl-close">Close</button></div><iframe id="pl-frame" title="Print preview"></iframe></div>
+<script>
+(function () {
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ONE-TIME SETUP — paste your Google Web app link between the quotes below.
+   It looks like:  https://script.google.com/macros/s/AKfycb…/exec
+   ═══════════════════════════════════════════════════════════════════════ */
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVJQETXLB0mBvDML8rBvbShRuUGWUWIipnJdT0ttuWv46WRsBnlJeijO3UKd9C7z4pDQ/exec';
+
+var VERSION = '1.1.0', API = 1;
+var LOGO = 'data:image/jpeg;base64,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';
+var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ═════════════ small helpers ═════════════ */
+function $(id) { return document.getElementById(id); }
+function esc(v) {
+  return String(v === null || v === undefined ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function keyOf(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function fmtKey(k) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(k || '');
+  return m ? (parseInt(m[3], 10) + ' ' + MON[parseInt(m[2], 10) - 1] + ' ' + m[1]) : '';
+}
+function noop() {}
+function mkStore(st) {
+  return {
+    get: function (k, d) { try { var v = st.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set: function (k, v) { try { st.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
+    del: function (k) { try { st.removeItem(k); } catch (e) { /* ignore */ } }
+  };
+}
+var LS, SS;
+try { LS = mkStore(window.localStorage); SS = mkStore(window.sessionStorage); }
+catch (e0) { var mem = {}; LS = SS = { get: function (k, d) { return k in mem ? mem[k] : d; }, set: function (k, v) { mem[k] = v; return true; }, del: function (k) { delete mem[k]; } }; }
+
+function uid() { return 'R' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function verLess(a, b) {
+  var x = String(a).split('.'), y = String(b).split('.');
+  for (var i = 0; i < 3; i++) { var p = parseInt(x[i], 10) || 0, q = parseInt(y[i], 10) || 0; if (p !== q) return p < q; }
+  return false;
+}
+function normCard(c) { return String(c || '').replace(/\s+/g, '').toUpperCase(); }
+function localTime() { return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }); }
+
+/* ═════════════ sections and state ═════════════ */
+var SEC = {
+  Registration: { label: 'Registration',    desc: 'Register patients and correct their details', tabs: ['reg'] },
+  Nursing:      { label: 'Nursing Vitals',  desc: 'Record vitals for registered patients',        tabs: ['nurse'] },
+  MO:           { label: 'Medical Officer', desc: 'Consultation, tests and triage',               tabs: ['mo'] },
+  Print:        { label: 'Print Records',   desc: 'Print summaries for any date',                 tabs: ['print'] },
+  Admin:        { label: 'Admin',           desc: 'Access to every section',                      tabs: ['reg', 'nurse', 'mo', 'print'] }
+};
+var SEC_ORDER = ['Registration', 'Nursing', 'MO', 'Print', 'Admin'];
+var TAB_LABEL = { reg: 'Registration', nurse: 'Nursing Vitals', mo: 'Medical Officer', print: 'Print' };
+
+var S = {
+  url: SCRIPT_URL,
+  token: null, section: null, campId: null, camp: null, camps: [], today: '', serverVersion: '',
+  settings: { hospital: LS.get('hc.hosp', 'Health Camp'), autoLockMin: 30, refreshSec: 12, cutoffHour: LS.get('hc.cut', 0), testMode: false, printFooter: '' },
+  records: {}, since: 0,
+  queue: LS.get('hc.queue', []),
+  pulling: false, flushing: false, lastOk: 0, lastErr: null,
+  lastAct: Date.now(), locked: false, tab: null, pendingSec: null, busy: false,
+  editReg: null, nurseRid: null, moRid: null, tri: '',
+  pr: null, prReq: 0, printing: null, viewOnly: false, viewDate: '', viewReq: 0,
+  pollTimer: null, tickTimer: null
+};
+if (!Array.isArray(S.queue)) S.queue = [];
+
+function bizKey() { return keyOf(new Date(Date.now() - S.settings.cutoffHour * 3600000)); }
+
+/* ═════════════ toast and dialog ═════════════ */
+var toastTimer;
+function toast(msg, kind) {
+  var t = $('toast');
+  t.textContent = msg;
+  t.className = 'show ' + (kind || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { t.className = ''; }, kind === 'err' ? 5500 : 2800);
+}
+
+var dlgChain = Promise.resolve();
+function openDialog(o) {
+  return new Promise(function (resolve) {
+    $('dlg-title').textContent = o.title || '';
+    $('dlg-body').innerHTML = o.html ? o.html : '<p>' + esc(o.body || '') + '</p>';
+    var yes = $('dlg-yes'), no = $('dlg-no');
+    yes.textContent = o.yes || 'OK';
+    if (o.no) { no.hidden = false; no.textContent = o.no; } else { no.hidden = true; }
+    $('dlg').hidden = false;
+    function done(v) {
+      $('dlg').hidden = true; yes.onclick = null; no.onclick = null;
+      document.removeEventListener('keydown', onKey, true);
+      resolve(v);
+    }
+    function onKey(e) { if (e.key === 'Escape') { e.stopPropagation(); done(false); } }
+    yes.onclick = function () { done(true); };
+    no.onclick = function () { done(false); };
+    document.addEventListener('keydown', onKey, true);
+    yes.focus();
+  });
+}
+function dialog(o) {
+  var p = dlgChain.then(function () { return openDialog(o); });
+  dlgChain = p.then(noop, noop);
+  return p;
+}
+
+/* ═════════════ screens ═════════════ */
+function showOnly(name) {
+  var ids = ['screen-setup', 'screen-login', 'screen-camp', 'app', 'lock'];
+  for (var i = 0; i < ids.length; i++) $(ids[i]).hidden = (ids[i] !== name);
+  var b = $('boot'); if (b) b.hidden = true;
+  window.scrollTo(0, 0);
+}
+function setMsg(id, text, kind) { var e = $(id); e.textContent = text || ''; e.className = 'msg' + (kind ? ' ' + kind : ''); }
+function showAlert(id, text) { var e = $(id); e.textContent = text; e.hidden = false; }
+function hideAlert(id) { var e = $(id); e.hidden = true; e.textContent = ''; }
+function markErr(id, on) { var e = $(id); if (e) { if (on) e.classList.add('err'); else e.classList.remove('err'); } }
+
+/* ═════════════ talking to the Google script ═════════════ */
+function api(a, body, timeoutMs) {
+  return new Promise(function (resolve, reject) {
+    if (!S.url) { reject({ code: 'network' }); return; }
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var finished = false;
+    var timer = setTimeout(function () {
+      if (finished) return; finished = true;
+      if (ctrl) { try { ctrl.abort(); } catch (e) { /* ignore */ } }
+      reject({ code: 'timeout' });
+    }, timeoutMs || 25000);
+    var payload = Object.assign({ a: a, t: S.token }, body || {});
+    fetch(S.url, {
+      method: 'POST', body: JSON.stringify(payload), cache: 'no-store', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, signal: ctrl ? ctrl.signal : undefined
+    }).then(function (r) { return r.text(); }).then(function (t) {
+      if (finished) return; finished = true; clearTimeout(timer);
+      var j; try { j = JSON.parse(t); } catch (e) { reject({ code: 'bad_response' }); return; }
+      resolve(j);
+    }).catch(function () {
+      if (finished) return; finished = true; clearTimeout(timer);
+      reject({ code: 'network' });
+    });
+  });
+}
+
+/* ═════════════ 1. link check ═════════════ */
+function isConfigured() { return /^https:\/\/script\.google\.com\/[A-Za-z0-9_\-\/\.]+\/exec$/.test(S.url || ''); }
+function showSetupNeeded() { stopPoll(); showOnly('screen-setup'); }
+
+/* ═════════════ 2. sign in ═════════════ */
+function buildSecTiles() {
+  var h = '';
+  SEC_ORDER.forEach(function (k) {
+    h += '<button type="button" class="sec-tile' + (k === 'Admin' ? ' admin' : '') + '" data-sec="' + k + '" aria-pressed="false"><b>' + esc(SEC[k].label) + '</b><span>' + esc(SEC[k].desc) + '</span></button>';
+  });
+  $('l-secs').innerHTML = h;
+}
+function showLogin(msg) {
+  stopPoll(); S.token = null; S.locked = false;
+  showOnly('screen-login');
+  buildSecTiles();
+  S.pendingSec = null;
+  $('l-pinbox').hidden = true; $('l-pin').value = ''; $('l-go').disabled = true;
+  $('l-hosp').textContent = S.settings.hospital || 'Health Camp';
+  $('l-ver').textContent = 'Version ' + VERSION;
+  setMsg('l-msg', msg || '', msg ? 'err' : '');
+}
+function selectSection(sec) {
+  S.pendingSec = sec;
+  var tiles = $('l-secs').querySelectorAll('.sec-tile');
+  for (var i = 0; i < tiles.length; i++) tiles[i].setAttribute('aria-pressed', tiles[i].getAttribute('data-sec') === sec ? 'true' : 'false');
+  $('l-secname').textContent = SEC[sec].label;
+  $('l-pinbox').hidden = false;
+  $('l-pin').value = ''; $('l-go').disabled = true; setMsg('l-msg', '', '');
+  $('l-pin').focus();
+}
+function doLogin() {
+  if (S.busy) return;
+  var sec = S.pendingSec, pin = $('l-pin').value;
+  if (!sec) { setMsg('l-msg', 'Choose your section first.', 'err'); return; }
+  if (!/^\d{6}$/.test(pin)) { setMsg('l-msg', 'Enter the 6-digit PIN.', 'err'); return; }
+  S.busy = true; $('l-go').disabled = true; setMsg('l-msg', 'Signing in…', '');
+  api('login', { section: sec, pin: pin }).then(function (r) {
+    S.busy = false; $('l-pin').value = '';
+    if (!r.ok) { setMsg('l-msg', r.msg || 'Could not sign in.', 'err'); return; }
+    onLoginOk(r);
+  }).catch(function () {
+    S.busy = false; $('l-go').disabled = false;
+    setMsg('l-msg', 'Cannot reach the server. Check the internet and try again.', 'err');
+  });
+}
+function applyLoginData(r) {
+  S.token = r.token; S.section = r.section; S.camps = r.camps || []; S.today = r.today;
+  S.serverVersion = r.version || '';
+  S.settings = r.settings;
+  LS.set('hc.cut', S.settings.cutoffHour); LS.set('hc.hosp', S.settings.hospital);
+  LS.set('hc.day', bizKey());
+  S.lastAct = Date.now();
+}
+function onLoginOk(r) {
+  if (r.api !== API) { setMsg('l-msg', 'This page is out of date. Please refresh the page.', 'err'); return; }
+  applyLoginData(r);
+  $('ban-ver').hidden = !verLess(VERSION, r.minClient || '0.0.0');
+  chooseCamp();
+}
+
+/* ═════════════ 3. choose camp ═════════════ */
+function chooseCamp() {
+  if (S.section === 'Print') { S.campId = null; S.camp = null; startSession(); return; }
+  var isAdmin = S.section === 'Admin';
+  var list = S.camps.filter(function (c) { return isAdmin || c.active; });
+  $('k-who').textContent = SEC[S.section].label + (isAdmin ? ' — choose a camp (closed camps open view-only)' : ' — choose the camp you are working at');
+  if (!isAdmin && !list.length) {
+    showOnly('screen-camp'); $('k-list').innerHTML = ''; $('k-go').disabled = true;
+    setMsg('k-msg', 'There is no active camp. Ask the admin to add a camp in the Camps tab with Status = Active.', 'err');
+    return;
+  }
+  var last = LS.get('hc.last', {}), pre = null, i;
+  if (!isAdmin && list.length === 1) { pickCamp(list[0].id); return; }
+  for (i = 0; i < list.length; i++) if (last.section === S.section && last.campId === list[i].id) pre = list[i].id;
+  var h = '';
+  list.forEach(function (c) {
+    h += '<button type="button" class="camp-tile" data-camp="' + esc(c.id) + '" aria-pressed="' + (c.id === pre ? 'true' : 'false') + '"><b>' + esc(c.name) + (c.active ? '' : '<em class="tag">Closed</em>') + '</b><span>' + esc(c.location) + ' · ' + esc(c.date) + ' · ' + esc(c.id) + '</span></button>';
+  });
+  if (isAdmin) h += '<button type="button" class="camp-tile" data-camp="__PRINT__" aria-pressed="false"><b>Print screen only</b><span>All camps, any date — no live camp</span></button>';
+  $('k-list').innerHTML = h; S.pendingCamp = pre; $('k-go').disabled = !pre;
+  setMsg('k-msg', '', ''); showOnly('screen-camp');
+}
+function pickCamp(id) {
+  if (id === '__PRINT__') { S.campId = null; S.camp = null; startSession(); return; }
+  var c = null;
+  for (var i = 0; i < S.camps.length; i++) if (S.camps[i].id === id) c = S.camps[i];
+  if (!c) return;
+  S.campId = id; S.camp = c;
+  LS.set('hc.last', { section: S.section, campId: id });
+  startSession();
+}
+
+/* ═════════════ cache / session persistence ═════════════ */
+function loadCache() {
+  S.records = {}; S.since = 0;
+  var c = LS.get('hc.cache', null);
+  if (c && S.campId && c.campId === S.campId && c.day === S.today && c.records) { S.records = c.records; S.since = c.since || 0; }
+}
+var cacheTimer = null;
+function persistCacheSoon() {
+  if (cacheTimer) return;
+  cacheTimer = setTimeout(function () {
+    cacheTimer = null;
+    if (!S.campId || S.viewOnly) return;
+    if (!LS.set('hc.cache', { campId: S.campId, day: S.today, since: S.since, records: S.records })) LS.del('hc.cache');
+  }, 400);
+}
+function saveQueue() { return LS.set('hc.queue', S.queue); }
+function persistSession() {
+  if (!S.token) return;
+  SS.set('hc.sess', { token: S.token, section: S.section, campId: S.campId, camps: S.camps, settings: S.settings, today: S.today, serverVersion: S.serverVersion, day: bizKey(), lastAct: S.lastAct });
+}
+
+/* ═════════════ session start, tabs ═════════════ */
+function startSession() {
+  var sec = SEC[S.section];
+  showOnly('app');
+  S.locked = false; $('lock').hidden = true;
+  $('h-hosp').textContent = S.settings.hospital;
+  $('h-camp').innerHTML = S.camp ? esc(S.camp.name) + '<small>' + esc(S.camp.location) + ' · ' + esc(S.camp.date) + '</small>' : 'All camps';
+  $('chip-role').textContent = sec.label;
+  $('ban-test').hidden = !S.settings.testMode;
+  S.viewOnly = !!(S.camp && !S.camp.active);
+  if (S.viewOnly && !/^\d{4}-\d{2}-\d{2}$/.test(S.viewDate || '')) S.viewDate = S.camp.date_key;
+  $('ban-closed').hidden = !S.viewOnly;
+  if (S.viewOnly) $('v-date').value = S.viewDate;
+  $('r-formcard').hidden = S.viewOnly;
+  buildTabs();
+  if (S.viewOnly) { S.records = {}; S.since = 0; } else loadCache();
+  S.lastOk = 0; S.lastErr = null;
+  persistSession();
+  startPoll();
+  renderAll();
+  if (S.viewOnly) { loadView(); pull(false); } else syncNow(true);
+}
+function loadView() {
+  if (!S.viewOnly || !S.camp || !S.token) return Promise.resolve();
+  var req = ++S.viewReq;
+  return api('listDate', { dateKey: S.viewDate, campId: S.campId }).then(function (r) {
+    if (req !== S.viewReq) return;
+    if (!r.ok) {
+      if (r.code === 'session') lockApp('Your session ended. Enter the PIN to continue.');
+      else toast(r.msg || 'Could not load this date.', 'err');
+      return;
+    }
+    S.records = {};
+    (r.records || []).forEach(function (x) { S.records[x.rid] = x; });
+    S.lastOk = Date.now(); S.lastErr = null;
+    renderAll();
+  }).catch(function (e) { S.lastErr = e || { code: 'network' }; renderStatus(); });
+}
+function buildTabs() {
+  var tabs = S.campId ? SEC[S.section].tabs : ['print'], h = '';
+  tabs.forEach(function (t) {
+    h += '<button type="button" class="tab" role="tab" data-tab="' + t + '" aria-selected="false">' + esc(TAB_LABEL[t]) + (t === 'print' ? '' : ' <span class="cnt" id="cnt-' + t + '">0</span>') + '</button>';
+  });
+  $('tabs').innerHTML = h;
+  $('tabs').hidden = tabs.length < 2;
+  showTab(tabs.indexOf(S.tab) >= 0 ? S.tab : tabs[0]);
+}
+function showTab(id) {
+  S.tab = id;
+  var ids = ['reg', 'nurse', 'mo', 'print'];
+  for (var i = 0; i < ids.length; i++) $('p-' + ids[i]).hidden = (ids[i] !== id);
+  var tabs = $('tabs').querySelectorAll('.tab');
+  for (var j = 0; j < tabs.length; j++) tabs[j].setAttribute('aria-selected', tabs[j].getAttribute('data-tab') === id ? 'true' : 'false');
+  if (id === 'print') initPrint();
+  renderAll();
+}
+
+/* ═════════════ records ═════════════ */
+function recs() {
+  var a = [];
+  for (var k in S.records) if (Object.prototype.hasOwnProperty.call(S.records, k)) a.push(S.records[k]);
+  a.sort(function (x, y) { return x.rid < y.rid ? 1 : (x.rid > y.rid ? -1 : 0); });
+  return a;
+}
+function matchQ(r, q) { return !q || (String(r.card) + ' ' + String(r.name) + ' ' + String(r.mobile || '')).toLowerCase().indexOf(q) >= 0; }
+function statusPill(r) {
+  var s = r.status === 'consultation_done' ? '<span class="pill p-done">Consultation done</span>'
+        : r.status === 'vitals_done' ? '<span class="pill p-vit">Vitals done</span>'
+        : '<span class="pill p-reg">Registered</span>';
+  return s + (r._pend ? ' <span class="pill p-sync">Saving…</span>' : '');
+}
+var TRI = { green: 'Green', yellow: 'Yellow', red: 'Red' };
+function triPill(t) { return TRI[t] ? '<span class="pill p-' + t + '"><span class="dot d-' + t + '"></span>' + TRI[t] + '</span>' : '<span style="color:#94a3b8">—</span>'; }
+function dash(v) { return v ? esc(v) : '<span style="color:#94a3b8">—</span>'; }
+function bmiCat(b) {
+  if (b < 18.5) return { label: 'Underweight', cls: 'bmi-under', range: 'Below 18.5', color: '#d97706' };
+  if (b < 25)   return { label: 'Normal weight', cls: 'bmi-normal', range: '18.5 – 24.9', color: '#16a34a' };
+  if (b < 30)   return { label: 'Overweight', cls: 'bmi-over', range: '25 – 29.9', color: '#ea580c' };
+  return { label: 'Obese', cls: 'bmi-obese', range: '30 and above', color: '#dc2626' };
+}
+function chipHtml(r) {
+  return '<div class="pt-chip"><span class="cno">' + esc(r.card) + '</span>' +
+    '<span class="inf"><b>' + esc(r.name) + '</b>Patient</span>' +
+    '<span class="inf"><b>' + esc(r.age) + ' yrs · ' + esc(r.gender) + '</b>Age / gender</span>' +
+    '<span class="inf"><b>' + esc(r.mobile) + '</b>Mobile</span></div>';
+}
+
+/* ═════════════ the save queue ═════════════ */
+function eligible(op) { return S.section === 'Admin' || op.by === S.section; }
+function serverOp(op) { return { type: op.type, rid: op.rid, campId: op.campId, force: !!op.force, data: op.data }; }
+
+function applyLocal(op) {
+  var d = op.data || {}, r;
+  if (op.type === 'register') {
+    var dk = S.today || bizKey();
+    S.records[op.rid] = { rid: op.rid, camp_id: op.campId, camp_name: S.camp ? S.camp.name : '', date_key: dk, date: fmtKey(dk),
+      card: d.card, name: d.name, age: String(+d.age), gender: d.gender, mobile: d.mobile, time: localTime(), status: 'registered', updated_ms: 0, _pend: true };
+  } else if (op.type === 'editReg') {
+    r = S.records[op.rid];
+    if (r) { r.card = d.card; r.name = d.name; r.age = String(+d.age); r.gender = d.gender; r.mobile = d.mobile; r._pend = true; }
+  } else if (op.type === 'vitals') {
+    r = S.records[op.rid];
+    if (r) {
+      var m = String(d.bp).match(/^(\d{2,3})\/(\d{2,3})/);
+      r.bp = m ? m[1] + '/' + m[2] : d.bp; r.pulse = String(parseFloat(d.pulse)); r.temp = String(parseFloat(d.temp)); r.rbs = d.rbs;
+      r.height = String(parseFloat(d.height)); r.weight = String(parseFloat(d.weight));
+      var b = Math.round(parseFloat(d.weight) / Math.pow(parseFloat(d.height) / 100, 2) * 10) / 10;
+      r.bmi = String(b); r.bmi_cat = bmiCat(b).label;
+      if (r.status === 'registered') r.status = 'vitals_done';
+      r._pend = true;
+    }
+  } else if (op.type === 'consult') {
+    r = S.records[op.rid];
+    if (r) {
+      ['triage', 'meds', 'fp', 'surgery', 'referral', 'hc', 'bi', 'dp', 'cp', 'echo', 'vitamin', 'bi_detail', 'remarks'].forEach(function (k) { r[k] = d[k]; });
+      r.status = 'consultation_done'; r._pend = true;
+    }
+  } else if (op.type === 'printed') {
+    var when = new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    (d.rids || []).forEach(function (id) {
+      var x = S.records[id]; if (x) { x.printed = true; x.printed_at = when; x._pend = true; }
+      if (S.pr) S.pr.records.forEach(function (y) { if (y.rid === id) { y.printed = true; y.printed_at = when; } });
+    });
+  }
+  persistCacheSoon();
+}
+
+function enqueue(op) {
+  op.id = uid(); op.by = S.section; op.campId = op.campId || S.campId; op.at = Date.now();
+  applyLocal(op);
+  S.queue.push(op);
+  if (!saveQueue()) dialog({ title: 'Storage is full', body: 'This device cannot store more unsent records. Connect to the internet so they can be sent, then continue.', yes: 'OK' });
+  renderAll();
+  flush();
+}
+
+function applyServerRec(rec) {
+  if (!rec || !rec.rid) return;
+  if (S.records[rec.rid] || (S.campId && rec.camp_id === S.campId)) {
+    S.records[rec.rid] = rec;
+    S.queue.forEach(function (op) {
+      if (op.rid === rec.rid && op.type !== 'register') applyLocal(op);
+    });
+  }
+  if (S.pr) for (var i = 0; i < S.pr.records.length; i++) if (S.pr.records[i].rid === rec.rid) S.pr.records[i] = rec;
+}
+
+function failOp(op, r) {
+  if (r.code === 'session') { lockApp('Your session ended. Enter the PIN to continue.'); return Promise.resolve(false); }
+  if (r.code === 'busy') {
+    op._busy = (op._busy || 0) + 1;
+    if (op._busy > 4) return Promise.resolve(false);
+    return new Promise(function (res) { setTimeout(function () { res(true); }, 1500); });
+  }
+  if (r.code === 'dup_card') {
+    return dialog({ title: 'Card No already used', body: (r.msg || '') + '\n\nRegister this patient with the same card no anyway?', yes: 'Register anyway', no: 'Cancel registration' }).then(function (y) {
+      if (y) { op.force = true; saveQueue(); return true; }
+      S.queue.splice(S.queue.indexOf(op), 1); saveQueue(); delete S.records[op.rid]; renderAll(); return true;
+    });
+  }
+  // permanent problem: remove it, tell the user, and reload the real data
+  S.queue.splice(S.queue.indexOf(op), 1); saveQueue();
+  return dialog({ title: 'Could not save', body: (r.msg || 'The server did not accept this record.') + '\n\nThe screen will now reload the saved data.', yes: 'OK' }).then(function () {
+    return pull(true).then(function () { return true; });
+  });
+}
+
+function flush() {
+  if (S.flushing || !S.token || S.locked) return Promise.resolve();
+  S.flushing = true;
+  function next() {
+    var op = null, i;
+    for (i = 0; i < S.queue.length; i++) { if (eligible(S.queue[i])) { op = S.queue[i]; break; } }
+    if (!op) { S.flushing = false; renderAll(); return Promise.resolve(); }
+    return api('save', { op: serverOp(op) }).then(function (r) {
+      if (r && r.ok) {
+        var at = S.queue.indexOf(op); if (at >= 0) S.queue.splice(at, 1);
+        saveQueue();
+        (r.records || []).forEach(applyServerRec);
+        S.lastOk = Date.now(); S.lastErr = null;
+        persistCacheSoon(); renderAll();
+        return next();
+      }
+      return failOp(op, r || {}).then(function (cont) {
+        if (cont) return next();
+        S.flushing = false; renderAll();
+      });
+    }).catch(function (e) {
+      S.flushing = false; S.lastErr = e || { code: 'network' }; renderStatus();
+    });
+  }
+  return next();
+}
+
+/* ═════════════ pulling from the sheet ═════════════ */
+function pendingRids() {
+  var m = {};
+  S.queue.forEach(function (op) {
+    if (op.rid) m[op.rid] = true;
+    if (op.data && op.data.rids) op.data.rids.forEach(function (x) { m[x] = true; });
+  });
+  return m;
+}
+function mergeServer(list, full) {
+  var pend = pendingRids(), changed = false, ids = {};
+  list.forEach(function (rec) {
+    ids[rec.rid] = true;
+    if (rec.updated_ms > S.since) S.since = rec.updated_ms;
+    if (pend[rec.rid]) return;
+    var old = S.records[rec.rid];
+    if (!old || old.updated_ms !== rec.updated_ms || old._pend) { S.records[rec.rid] = rec; changed = true; }
+  });
+  if (full) Object.keys(S.records).forEach(function (k) { if (!ids[k] && !pend[k]) { delete S.records[k]; changed = true; } });
+  persistCacheSoon();
+  if (changed) renderAll();
+}
+function pull(full) {
+  if (!S.token || S.locked || S.pulling) return Promise.resolve(false);
+  S.pulling = true;
+  var p = (S.campId && !S.viewOnly) ? api('list', { campId: S.campId, since: full ? 0 : Math.max(0, S.since - 3000) }) : api('keepalive');
+  return p.then(function (r) {
+    S.pulling = false;
+    if (!r || !r.ok) {
+      if (r && r.code === 'session') lockApp('Your session ended. Enter the PIN to continue.');
+      else { S.lastErr = { code: (r && r.code) || 'server' }; renderStatus(); }
+      return false;
+    }
+    S.lastOk = Date.now(); S.lastErr = null;
+    if (S.campId && !S.viewOnly) mergeServer(r.records || [], !!r.full);
+    renderStatus();
+    return true;
+  }).catch(function (e) { S.pulling = false; S.lastErr = e || { code: 'network' }; renderStatus(); return false; });
+}
+function syncNow(full) { return flush().then(function () { return pull(!!full); }); }
+function startPoll() {
+  stopPoll();
+  S.pollTimer = setInterval(function () {
+    if (!S.token || S.locked || document.hidden) return;
+    syncNow(false);
+  }, Math.max(5, S.settings.refreshSec || 12) * 1000);
+}
+function stopPoll() { if (S.pollTimer) { clearInterval(S.pollTimer); S.pollTimer = null; } }
+
+/* ═════════════ status chips and banners ═════════════ */
+function renderStatus() {
+  if ($('app').hidden) return;
+  var chip = $('chip-sync'), fresh = S.lastOk && (Date.now() - S.lastOk) < ((S.settings.refreshSec || 12) * 3000 + 12000);
+  if (!S.lastOk && !S.lastErr) { chip.className = 'chip'; chip.textContent = 'Connecting…'; }
+  else if (!S.lastErr && fresh) { chip.className = 'chip ok'; chip.textContent = '● Updated ' + new Date(S.lastOk).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
+  else { chip.className = 'chip bad'; chip.textContent = '● Not updating — check internet'; }
+  var q = $('chip-queue');
+  if (S.queue.length) { q.hidden = false; q.textContent = '⏳ ' + S.queue.length + ' unsaved'; } else { q.hidden = true; }
+  var foreign = S.queue.filter(function (o) { return !eligible(o); });
+  var b = $('ban-queue');
+  if (foreign.length) {
+    var names = {}; foreign.forEach(function (o) { names[SEC[o.by] ? SEC[o.by].label : o.by] = 1; });
+    b.hidden = false;
+    b.textContent = foreign.length + ' unsaved record(s) from ' + Object.keys(names).join(', ') + ' are waiting on this device. Sign in to that section to send them.';
+  } else { b.hidden = true; }
+}
+
+/* ═════════════ rendering ═════════════ */
+function renderAll() {
+  if ($('app').hidden) return;
+  if (S.tab === 'reg') renderReg();
+  else if (S.tab === 'nurse') renderNurse();
+  else if (S.tab === 'mo') renderMO();
+  else if (S.tab === 'print') renderPrint();
+  var all = recs();
+  var c1 = $('cnt-reg'), c2 = $('cnt-nurse'), c3 = $('cnt-mo');
+  if (c1) c1.textContent = all.length;
+  if (c2) c2.textContent = all.filter(function (r) { return r.status === 'registered'; }).length;
+  if (c3) c3.textContent = all.filter(function (r) { return r.status === 'vitals_done'; }).length;
+  renderStatus();
+}
+
+/* ───────── registration ───────── */
+function renderReg() {
+  var q = $('r-filter').value.trim().toLowerCase(), all = recs();
+  var list = all.filter(function (r) { return matchQ(r, q); });
+  $('r-count').textContent = (S.viewOnly ? fmtKey(S.viewDate) + ' · ' : '') + all.length + ' patient' + (all.length === 1 ? '' : 's') + (q ? ' · showing ' + list.length : '');
+  var h = '';
+  list.forEach(function (r) {
+    h += '<tr><td><b>' + esc(r.card) + '</b></td><td class="name">' + esc(r.name) + '</td><td>' + esc(r.age) + '</td><td>' + esc(r.gender) + '</td><td>' + esc(r.mobile) + '</td><td>' + esc(r.time) + '</td><td>' + statusPill(r) + '</td>' +
+         '<td>' + (S.viewOnly ? '' : '<button class="btn btn-sm" data-act="reg-edit" data-rid="' + esc(r.rid) + '">Edit</button>') + '</td></tr>';
+  });
+  $('r-tbody').innerHTML = h || '<tr><td colspan="8" class="empty">' + (q ? 'No patient matches your filter.' : (S.viewOnly ? 'No patients on this date.' : 'No patients registered yet today.')) + '</td></tr>';
+}
+function getGender() { var rs = document.getElementsByName('r-gender'); for (var i = 0; i < rs.length; i++) if (rs[i].checked) return rs[i].value; return ''; }
+function setGender(v) { var rs = document.getElementsByName('r-gender'); for (var i = 0; i < rs.length; i++) rs[i].checked = (rs[i].value === v); }
+function clearReg() {
+  S.editReg = null;
+  ['r-card', 'r-name', 'r-age', 'r-mobile'].forEach(function (id) { $(id).value = ''; markErr(id, false); });
+  setGender(''); markErr('r-gender', false);
+  $('r-title').textContent = 'Register a patient'; $('r-save').textContent = 'Register patient';
+  $('r-editbar').hidden = true; $('r-cancel').hidden = true; hideAlert('r-alert');
+}
+function openRegEdit(rid) {
+  var r = S.records[rid]; if (!r) return;
+  clearReg(); S.editReg = rid;
+  $('r-card').value = r.card; $('r-name').value = r.name; $('r-age').value = r.age; $('r-mobile').value = r.mobile; setGender(r.gender);
+  $('r-title').textContent = 'Edit patient details'; $('r-save').textContent = 'Save changes';
+  $('r-editbar').textContent = 'Editing Card No ' + r.card + ' — change the details below and press Save changes.'; $('r-editbar').hidden = false;
+  $('r-cancel').hidden = false;
+  window.scrollTo(0, 0); $('r-name').focus();
+}
+function validateReg(d) {
+  var bad = [];
+  function chk(id, ok, msg) { markErr(id, !ok); if (!ok) bad.push(msg); }
+  chk('r-card', !!d.card, 'Card No is required');
+  chk('r-name', !!d.name, 'Patient name is required');
+  var a = +d.age; chk('r-age', /^\d{1,3}$/.test(d.age) && a >= 1 && a <= 120, 'Age must be 1 to 120');
+  markErr('r-gender', !d.gender); if (!d.gender) bad.push('Select a gender');
+  chk('r-mobile', /^[6-9]\d{9}$/.test(d.mobile), 'Mobile must be 10 digits starting with 6 to 9');
+  return bad;
+}
+function saveReg() {
+  var d = { card: $('r-card').value.trim(), name: $('r-name').value.trim(), age: $('r-age').value.trim(), gender: getGender(), mobile: $('r-mobile').value.trim() };
+  var bad = validateReg(d);
+  if (bad.length) { showAlert('r-alert', bad.join('  ·  ')); return; }
+  hideAlert('r-alert');
+  if (S.editReg) {
+    var rid = S.editReg;
+    if (!S.records[rid]) { clearReg(); return; }
+    enqueue({ type: 'editReg', rid: rid, data: d });
+    toast('Changes saved — ' + d.name, 'ok'); clearReg(); return;
+  }
+  var n = normCard(d.card), dup = null;
+  recs().forEach(function (r) { if (!dup && normCard(r.card) === n) dup = r; });
+  function go(force) {
+    enqueue({ type: 'register', rid: uid(), force: !!force, data: d });
+    toast('Registered — ' + d.name, 'ok'); clearReg(); $('r-card').focus();
+  }
+  if (dup) {
+    dialog({ title: 'Card No already used', body: 'Card No ' + d.card + ' is already registered today for ' + dup.name + '.\n\nRegister this patient with the same card no anyway?', yes: 'Register anyway', no: 'Go back' }).then(function (y) { if (y) go(true); });
+  } else go(false);
+}
+
+/* ───────── nursing ───────── */
+function renderNurse() {
+  var q = $('n-filter').value.trim().toLowerCase(), st = $('n-status').value, all = recs();
+  var list = all.filter(function (r) {
+    if (!matchQ(r, q)) return false;
+    if (st === 'registered') return r.status === 'registered';
+    if (st === 'done') return r.status !== 'registered';
+    return true;
+  });
+  var waiting = all.filter(function (r) { return r.status === 'registered'; }).length;
+  $('n-count').textContent = (S.viewOnly ? fmtKey(S.viewDate) + ' · ' : '') + all.length + ' patient' + (all.length === 1 ? '' : 's') + ' · ' + waiting + ' waiting for vitals' + ((q || st) ? ' · showing ' + list.length : '');
+  var h = '';
+  list.forEach(function (r) {
+    var wait = r.status === 'registered';
+    h += '<tr><td><b>' + esc(r.card) + '</b></td><td class="name">' + esc(r.name) + '</td><td>' + esc(r.age) + '</td><td>' + esc(r.gender) + '</td><td>' + esc(r.mobile) + '</td>' +
+         '<td>' + dash(r.bp) + '</td><td>' + dash(r.pulse) + '</td><td>' + dash(r.temp) + '</td><td>' + dash(r.rbs) + '</td><td>' + dash(r.bmi) + '</td><td>' + statusPill(r) + '</td>' +
+         '<td>' + (S.viewOnly ? '' : '<button class="btn btn-sm ' + (wait ? 'btn-teal' : '') + '" data-act="nurse-open" data-rid="' + esc(r.rid) + '">' + (wait ? 'Enter vitals' : 'Edit vitals') + '</button>') + '</td></tr>';
+  });
+  $('n-tbody').innerHTML = h || '<tr><td colspan="12" class="empty">' + ((q || st) ? 'No patient matches.' : (S.viewOnly ? 'No patients on this date.' : 'No patients yet. They appear here as soon as they are registered.')) + '</td></tr>';
+}
+function calcBmi() {
+  var h = parseFloat($('n-height').value), w = parseFloat($('n-weight').value), box = $('n-bmi');
+  if (!(h >= 50 && h <= 250 && w >= 1 && w <= 300)) { box.hidden = true; return; }
+  var b = Math.round(w / Math.pow(h / 100, 2) * 10) / 10, c = bmiCat(b);
+  box.hidden = false;
+  $('n-bmi-val').textContent = b;
+  $('n-bmi-badge').textContent = c.label; $('n-bmi-badge').className = 'bmi-badge ' + c.cls;
+  $('n-bmi-range').textContent = 'Range: ' + c.range;
+  var bar = $('n-bmi-bar'); bar.style.width = Math.min(100, b / 40 * 100) + '%'; bar.style.background = c.color;
+}
+function clearNurseFields() {
+  ['n-bp', 'n-pulse', 'n-temp', 'n-rbs', 'n-height', 'n-weight'].forEach(function (id) { $(id).value = ''; markErr(id, false); });
+  hideAlert('n-alert'); calcBmi();
+}
+function openNurse(rid) {
+  var r = S.records[rid]; if (!r) return;
+  clearNurseFields(); S.nurseRid = rid;
+  $('n-chip').innerHTML = chipHtml(r);
+  if (r.status !== 'registered') {
+    $('n-bp').value = r.bp || ''; $('n-pulse').value = r.pulse || ''; $('n-temp').value = r.temp || '';
+    $('n-rbs').value = r.rbs || ''; $('n-height').value = r.height || ''; $('n-weight').value = r.weight || '';
+  }
+  calcBmi();
+  $('n-form').hidden = false;
+  $('n-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('n-bp').focus();
+}
+function closeNurse() { $('n-form').hidden = true; S.nurseRid = null; clearNurseFields(); }
+function saveVitals() {
+  var r = S.records[S.nurseRid]; if (!r) { closeNurse(); return; }
+  var d = { bp: $('n-bp').value.trim(), pulse: $('n-pulse').value.trim(), temp: $('n-temp').value.trim(), rbs: $('n-rbs').value.trim(), height: $('n-height').value.trim(), weight: $('n-weight').value.trim() };
+  var bad = [];
+  function chk(id, ok, msg) { markErr(id, !ok); if (!ok) bad.push(msg); }
+  function rng(v, a, b) { var n = parseFloat(v); return !isNaN(n) && n >= a && n <= b; }
+  chk('n-bp', /^\d{2,3}\/\d{2,3}/.test(d.bp), 'BP must look like 120/80');
+  chk('n-pulse', rng(d.pulse, 30, 250), 'Pulse must be 30 to 250');
+  chk('n-temp', rng(d.temp, 90, 110), 'Temperature must be 90 to 110 °F');
+  chk('n-rbs', !!d.rbs, 'RBS is required');
+  chk('n-height', rng(d.height, 50, 250), 'Height must be 50 to 250 cm');
+  chk('n-weight', rng(d.weight, 1, 300), 'Weight must be 1 to 300 kg');
+  if (bad.length) { showAlert('n-alert', bad.join('  ·  ')); return; }
+  enqueue({ type: 'vitals', rid: S.nurseRid, data: d });
+  toast('Vitals saved — ' + r.name, 'ok');
+  closeNurse();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ───────── medical officer ───────── */
+function renderMO() {
+  var q = $('m-filter').value.trim().toLowerCase(), st = $('m-status').value;
+  var all = recs().filter(function (r) { return r.status === 'vitals_done' || r.status === 'consultation_done'; });
+  var list = all.filter(function (r) { return matchQ(r, q) && (!st || r.status === st); });
+  var waiting = all.filter(function (r) { return r.status === 'vitals_done'; }).length;
+  $('m-count').textContent = (S.viewOnly ? fmtKey(S.viewDate) + ' · ' : '') + all.length + ' patient' + (all.length === 1 ? '' : 's') + ' · ' + waiting + ' waiting for consultation' + ((q || st) ? ' · showing ' + list.length : '');
+  var h = '';
+  list.forEach(function (r) {
+    var wait = r.status === 'vitals_done';
+    h += '<tr><td><b>' + esc(r.card) + '</b></td><td class="name">' + esc(r.name) + '</td><td>' + esc(r.age) + '</td><td>' + esc(r.gender) + '</td>' +
+         '<td>' + dash(r.bp) + '</td><td>' + dash(r.pulse) + '</td><td>' + dash(r.temp) + '</td><td>' + dash(r.rbs) + '</td><td>' + dash(r.bmi) + '</td><td>' + triPill(r.triage) + '</td><td>' + statusPill(r) + '</td>' +
+         '<td>' + (S.viewOnly ? '' : '<button class="btn btn-sm ' + (wait ? 'btn-violet' : '') + '" data-act="mo-open" data-rid="' + esc(r.rid) + '">' + (wait ? 'Consult' : 'Edit') + '</button>') + '</td></tr>';
+  });
+  $('m-tbody').innerHTML = h || '<tr><td colspan="12" class="empty">' + ((q || st) ? 'No patient matches.' : 'No patient has vitals yet. They appear here as soon as the nurse saves vitals.') + '</td></tr>';
+}
+function setTriage(v) {
+  S.tri = v || '';
+  var bs = $('m-triage').querySelectorAll('.tri-btn');
+  for (var i = 0; i < bs.length; i++) bs[i].setAttribute('aria-pressed', bs[i].getAttribute('data-tri') === S.tri ? 'true' : 'false');
+  $('m-triage').classList.remove('err');
+  var hints = { green: 'Green — healthy, no action needed.', yellow: 'Yellow — moderate, needs monitoring.', red: 'Red — needs doctor consultation.' };
+  $('m-tri-hint').textContent = S.tri ? hints[S.tri] : 'Select Green, Yellow or Red before saving.';
+  $('m-tri-hint').style.color = '';
+}
+var MO_CHECKS = ['hc', 'bi', 'dp', 'cp', 'echo', 'vitamin'];
+function syncChecks() {
+  MO_CHECKS.forEach(function (k) { var c = $('m-' + k); c.parentNode.className = 'check' + (c.checked ? ' on' : ''); });
+}
+function clearMOFields() {
+  ['m-meds', 'm-fp', 'm-surgery', 'm-bi-detail', 'm-remarks'].forEach(function (id) { $(id).value = ''; });
+  $('m-referral').value = '';
+  MO_CHECKS.forEach(function (k) { $('m-' + k).checked = false; });
+  syncChecks(); setTriage(''); hideAlert('m-alert');
+}
+function openMO(rid) {
+  var r = S.records[rid]; if (!r) return;
+  if (r.status === 'registered') { toast('Vitals are not recorded yet for this patient.', 'warn'); return; }
+  clearMOFields(); S.moRid = rid;
+  $('m-chip').innerHTML = chipHtml(r);
+  var cells = [['BP', r.bp], ['Pulse', r.pulse ? r.pulse + ' bpm' : ''], ['Temp', r.temp ? r.temp + ' °F' : ''], ['RBS', r.rbs], ['Height', r.height ? r.height + ' cm' : ''], ['Weight', r.weight ? r.weight + ' kg' : ''], ['BMI', r.bmi], ['BMI category', r.bmi_cat]], h = '';
+  cells.forEach(function (c) { h += '<div class="vcell"><small>' + esc(c[0]) + '</small><b>' + (c[1] ? esc(c[1]) : '—') + '</b></div>'; });
+  $('m-vitals').innerHTML = h;
+  if (r.status === 'consultation_done') {
+    $('m-meds').value = r.meds || ''; $('m-fp').value = r.fp || ''; $('m-surgery').value = r.surgery || '';
+    $('m-referral').value = r.referral || ''; if ($('m-referral').value !== (r.referral || '')) $('m-referral').value = '';
+    MO_CHECKS.forEach(function (k) { $('m-' + k).checked = !!r[k]; });
+    $('m-bi-detail').value = r.bi_detail || ''; $('m-remarks').value = r.remarks || '';
+    setTriage(r.triage);
+  }
+  syncChecks();
+  $('m-form').hidden = false;
+  $('m-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function closeMO() { $('m-form').hidden = true; S.moRid = null; clearMOFields(); }
+function saveMO() {
+  var r = S.records[S.moRid]; if (!r) { closeMO(); return; }
+  if (!S.tri) {
+    $('m-triage').classList.add('err');
+    $('m-tri-hint').textContent = 'Triage is required — select Green, Yellow or Red.'; $('m-tri-hint').style.color = 'var(--red)';
+    $('m-triage').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  var d = {
+    triage: S.tri, meds: $('m-meds').value.trim(), fp: $('m-fp').value.trim(), surgery: $('m-surgery').value.trim(), referral: $('m-referral').value,
+    hc: $('m-hc').checked, bi: $('m-bi').checked, dp: $('m-dp').checked, cp: $('m-cp').checked, echo: $('m-echo').checked, vitamin: $('m-vitamin').checked,
+    bi_detail: $('m-bi-detail').value.trim(), remarks: $('m-remarks').value.trim()
+  };
+  enqueue({ type: 'consult', rid: S.moRid, data: d });
+  toast('Consultation saved — ' + r.name + '. You can print the summary now.', 'ok');
+}
+
+/* ───────── print section ───────── */
+function initPrint() {
+  if (!S.pr) S.pr = { dateKey: S.today || bizKey(), campId: S.campId || 'ALL', records: [], sel: {}, loaded: false };
+  var sel = $('pr-camp'), h = '<option value="ALL">All camps</option>';
+  S.camps.forEach(function (c) { h += '<option value="' + esc(c.id) + '">' + esc(c.name) + ' — ' + esc(c.location) + ' (' + esc(c.date) + ')</option>'; });
+  sel.innerHTML = h; sel.value = S.pr.campId;
+  if (sel.value !== S.pr.campId) { sel.value = 'ALL'; S.pr.campId = 'ALL'; }
+  $('pr-date').value = S.pr.dateKey;
+  loadPrint();
+}
+function loadPrint() {
+  var pr = S.pr, req = ++S.prReq;
+  if (!pr || !/^\d{4}-\d{2}-\d{2}$/.test(pr.dateKey)) return;
+  $('pr-tbody').innerHTML = '<tr><td colspan="9" class="empty">Loading…</td></tr>';
+  api('listDate', { dateKey: pr.dateKey, campId: pr.campId }).then(function (r) {
+    if (req !== S.prReq) return;
+    if (!r.ok) {
+      if (r.code === 'session') { lockApp('Your session ended. Enter the PIN to continue.'); return; }
+      $('pr-tbody').innerHTML = '<tr><td colspan="9" class="empty">' + esc(r.msg || 'Could not load.') + '</td></tr>'; return;
+    }
+    pr.records = (r.records || []).slice().sort(function (a, b) { return a.rid < b.rid ? 1 : (a.rid > b.rid ? -1 : 0); });
+    pr.sel = {}; pr.loaded = true; S.lastOk = Date.now(); S.lastErr = null;
+    renderPrint();
+  }).catch(function (e) {
+    if (req !== S.prReq) return;
+    S.lastErr = e || { code: 'network' };
+    $('pr-tbody').innerHTML = '<tr><td colspan="9" class="empty">Could not load. Check the internet and press Reload.</td></tr>';
+    renderStatus();
+  });
+}
+function prList() {
+  if (!S.pr) return [];
+  var q = $('pr-filter').value.trim().toLowerCase(), st = $('pr-status').value;
+  return S.pr.records.filter(function (r) {
+    if (!matchQ(r, q)) return false;
+    if (st === 'pending_done') return !r.printed && r.status === 'consultation_done';
+    if (st === 'pending') return !r.printed;
+    if (st === 'printed') return !!r.printed;
+    return true;
+  });
+}
+function renderPrint() {
+  if (!S.pr || !S.pr.loaded) return;
+  var list = prList(), selN = 0, h = '';
+  list.forEach(function (r) {
+    var on = !!S.pr.sel[r.rid]; if (on) selN++;
+    h += '<tr><td><input type="checkbox" data-act="pr-pick" data-rid="' + esc(r.rid) + '"' + (on ? ' checked' : '') + ' aria-label="Select ' + esc(r.name) + '" style="width:20px;height:20px"></td>' +
+         '<td><b>' + esc(r.card) + '</b></td><td class="name">' + esc(r.name) + '</td><td>' + esc(r.age) + ' / ' + esc(r.gender) + '</td><td>' + esc(r.mobile) + '</td>' +
+         '<td>' + triPill(r.triage) + '</td><td>' + statusPill(r) + '</td>' +
+         '<td>' + (r.printed ? '<span class="pill p-done">✓ ' + esc(r.printed_at || 'Printed') + '</span>' : '<span class="pill p-yellow">Pending</span>') + '</td>' +
+         '<td><button class="btn btn-sm" data-act="pr-print" data-rid="' + esc(r.rid) + '">Print</button></td></tr>';
+  });
+  $('pr-tbody').innerHTML = h || '<tr><td colspan="9" class="empty">Nothing to show for ' + esc(fmtKey(S.pr.dateKey)) + ' with these filters.</td></tr>';
+  var total = S.pr.records.length, pend = S.pr.records.filter(function (r) { return !r.printed; }).length;
+  $('pr-count').textContent = fmtKey(S.pr.dateKey) + ' · ' + total + ' patient' + (total === 1 ? '' : 's') + ' · ' + pend + ' not printed yet · showing ' + list.length;
+  $('pr-sel').textContent = 'Print selected (' + selN + ')'; $('pr-sel').disabled = !selN;
+  $('pr-all').textContent = 'Print all listed (' + list.length + ')'; $('pr-all').disabled = !list.length;
+}
+
+/* ═════════════ printing ═════════════ */
+function printDoc(list) {
+  var css = '*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,Helvetica,sans-serif;font-size:12.5px;color:#111;background:#fff}' +
+    '.page{max-width:790px;margin:0 auto;padding:22px 30px;display:flex;flex-direction:column;min-height:266mm;page-break-after:always;break-after:page}.page:last-child{page-break-after:auto;break-after:auto}' +
+    '.hd{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:3px solid #0055b3;padding-bottom:12px;margin-bottom:14px}' +
+    '.hd img{height:50px;width:auto}.hd .h1{font-size:19px;font-weight:700;color:#0f2a47}.hd .h2{font-size:12px;color:#555;margin-top:2px}' +
+    '.hd .r{text-align:right;font-size:12px;color:#444}.card{display:inline-block;margin-top:5px;border:2px solid #0055b3;border-radius:6px;padding:3px 12px;font-size:17px;font-weight:700;color:#0055b3}' +
+    '.sec{margin-bottom:12px}.st{font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#0055b3;border-bottom:1px solid #cfe0f5;padding-bottom:3px;margin-bottom:6px}' +
+    'table{width:100%;border-collapse:collapse}td{padding:4px 6px;vertical-align:top;border-bottom:1px solid #eee}td.l{width:30%;color:#555;font-size:11.5px}td.v{font-weight:600}' +
+    '.two{display:flex;gap:18px}.two>div{flex:1}' +
+    '.tri{display:flex;align-items:center;gap:12px;border:2px solid;border-radius:8px;padding:9px 14px}.tri i{width:20px;height:20px;border-radius:50%;display:block}.tri b{font-size:15px}.tri span{font-size:12px}' +
+    '.tri.green{border-color:#15803d;background:#e7f6ec;color:#15803d}.tri.green i{background:#16a34a}' +
+    '.tri.yellow{border-color:#d97706;background:#fdf1d6;color:#92400e}.tri.yellow i{background:#d97706}' +
+    '.tri.red{border-color:#b91c1c;background:#fdecec;color:#b91c1c}.tri.red i{background:#dc2626}' +
+    '.tests{display:flex;flex-wrap:wrap;gap:6px}.tests span{border:1px solid #0055b3;color:#0055b3;border-radius:999px;padding:2px 10px;font-size:11.5px;font-weight:600}' +
+    '.box{border:1px solid #ccc;border-radius:6px;padding:8px 10px;min-height:46px;white-space:pre-wrap}' +
+    '.sig{display:flex;justify-content:space-between;gap:30px;margin-top:34px}.sig div{flex:1;border-top:1px solid #333;padding-top:4px;font-size:11px;color:#555;text-align:center}' +
+    '.ft{margin-top:auto;padding-top:14px}.ft .in{border-top:1px solid #bbb;padding-top:6px;text-align:center;color:#444}.ft .fb{font-size:10.5px;font-weight:700;color:#111;margin-bottom:2px}.ft .fl{font-size:9px;line-height:1.4}.ft .fp{font-size:8.5px;color:#888;margin-top:4px}' +
+    '@page{size:A4;margin:10mm}';
+  var hosp = S.settings.hospital || '';
+  var now = new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  function rw(l, v) { return '<tr><td class="l">' + esc(l) + '</td><td class="v">' + (v ? esc(v) : '—') + '</td></tr>'; }
+  var tests = [['hc', 'Health checkup'], ['bi', 'Blood investigation'], ['dp', 'Diabetic profile'], ['cp', 'Cardiac profile'], ['echo', '2D Echo / TMT'], ['vitamin', 'Vitamin tests']];
+  var triTxt = { green: ['Green', 'Healthy — no action needed'], yellow: ['Yellow', 'Moderate — monitor'], red: ['Red', 'Needs doctor consultation'] };
+  var legal = String(S.settings.printFooter || '').split(/\r?\n/).filter(function (t) { return t.trim(); }).map(function (t, i) {
+    return '<div class="' + (i === 0 ? 'fb' : 'fl') + '">' + esc(t.trim()) + '</div>';
+  }).join('');
+  var pages = '';
+  list.forEach(function (r) {
+    var tl = '';
+    tests.forEach(function (t) { if (r[t[0]]) tl += '<span>✓ ' + t[1] + '</span>'; });
+    var tr = triTxt[r.triage];
+    pages += '<div class="page">' +
+      '<div class="hd"><div style="display:flex;align-items:center;gap:14px"><img src="' + LOGO + '" alt=""><div><div class="h1">' + esc(hosp) + '</div><div class="h2">Patient Health Summary</div></div></div>' +
+      '<div class="r"><div>' + esc(r.camp_name) + '</div><div>' + esc(r.date) + '</div><div class="card">' + esc(r.card) + '</div></div></div>' +
+      '<div class="two"><div class="sec"><div class="st">Patient information</div><table>' + rw('Name', r.name) + rw('Age / Gender', (r.age || '') + ' yrs / ' + (r.gender || '')) + rw('Mobile', r.mobile) + rw('Registered at', r.time) + '</table></div>' +
+      '<div class="sec"><div class="st">Vitals</div><table>' + rw('Blood pressure', r.bp ? r.bp + ' mmHg' : '') + rw('Pulse', r.pulse ? r.pulse + ' bpm' : '') + rw('Temperature', r.temp ? r.temp + ' °F' : '') + rw('RBS', r.rbs) +
+      rw('Height / Weight', (r.height || r.weight) ? (r.height || '—') + ' cm / ' + (r.weight || '—') + ' kg' : '') + rw('BMI', r.bmi ? r.bmi + (r.bmi_cat ? ' (' + r.bmi_cat + ')' : '') : '') + '</table></div></div>' +
+      '<div class="sec"><div class="st">Triage</div>' + (tr ? '<div class="tri ' + r.triage + '"><i></i><div><b>' + tr[0] + '</b><br><span>' + tr[1] + '</span></div></div>' : '<div class="box">Not assessed</div>') + '</div>' +
+      '<div class="sec"><div class="st">Medical history</div><table>' + rw('Regular medication', r.meds) + rw('Family physician', r.fp) + rw('Past surgery / illness', r.surgery) + '</table></div>' +
+      '<div class="sec"><div class="st">Referral and investigations</div><table>' + rw('Referral specialty', r.referral) + '</table>' +
+      (tl ? '<div class="tests" style="margin-top:8px">' + tl + '</div>' : '') + (r.bi_detail ? '<div style="margin-top:6px;font-size:12px"><b>Blood tests:</b> ' + esc(r.bi_detail) + '</div>' : '') + '</div>' +
+      '<div class="sec"><div class="st">Medical officer remarks</div><div class="box">' + (r.remarks ? esc(r.remarks) : '') + '</div></div>' +
+      '<div class="sig"><div>Medical Officer signature</div><div>Date</div></div>' +
+      '<div class="ft"><div class="in">' + (legal || '<div class="fb">' + esc(hosp) + '</div>') + '<div class="fp">Printed on ' + esc(now) + '</div></div></div></div>';
+  });
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Patient summary</title><style>' + css + '</style></head><body>' + pages + '</body></html>';
+}
+function printRecords(list) {
+  if (!list || !list.length) { toast('Nothing to print.', 'warn'); return; }
+  S.printing = { rids: list.map(function (r) { return r.rid; }), asked: false };
+  $('pl-title').textContent = 'Print preview — ' + list.length + ' patient' + (list.length === 1 ? '' : 's');
+  var f = $('pl-frame');
+  f.onload = function () { try { f.contentWindow.addEventListener('afterprint', onAfterPrint); } catch (e) { /* ignore */ } };
+  f.srcdoc = printDoc(list);
+  $('printlayer').hidden = false;
+}
+function onAfterPrint() {
+  var p = S.printing;
+  if (!p || p.asked) return;
+  p.asked = true;
+  setTimeout(function () {
+    dialog({ title: 'Mark as printed?', body: 'Did ' + p.rids.length + ' summary(ies) print correctly?\n\n"Mark as printed" removes them from the pending list.', yes: 'Mark as printed', no: 'Not printed' }).then(function (y) {
+      if (y) enqueue({ type: 'printed', data: { rids: p.rids } });
+      p.asked = false;
+    });
+  }, 300);
+}
+function closePrint() { $('printlayer').hidden = true; $('pl-frame').srcdoc = ''; S.printing = null; }
+
+/* ═════════════ info dialog ═════════════ */
+function showInfo() {
+  var u = S.url || '', maskedUrl = u ? u.replace(/^(https:\/\/script\.google\.com\/)(.*?)([A-Za-z0-9_\-]{6})\/exec$/, '$1…$3/exec') : '';
+  var rows = [
+    ['Section', SEC[S.section].label],
+    ['Camp', S.camp ? S.camp.name + ' · ' + S.camp.location : 'All camps'],
+    ['Camp ID', S.camp ? S.camp.id : '—'],
+    ['Working day', fmtKey(S.today)],
+    ['Last update', S.lastOk ? new Date(S.lastOk).toLocaleTimeString('en-IN') : 'not yet'],
+    ['Unsaved records', String(S.queue.length)],
+    ['Page version', VERSION],
+    ['Script version', S.serverVersion || '—']
+  ];
+  if (S.section === 'Admin') rows.push(['Script link', maskedUrl]);
+  var h = '<dl class="infolist">';
+  rows.forEach(function (r) { h += '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>'; });
+  h += '</dl>';
+  dialog({ title: 'Device information', html: h, yes: 'Re-sync now', no: 'Close' }).then(function (y) { if (y) { toast('Syncing…'); syncNow(true); } });
+}
+
+/* ═════════════ lock, sign out, new day ═════════════ */
+function lockApp(why) {
+  if (S.locked || !S.section) return;
+  var t = S.token;
+  S.locked = true; S.token = null; SS.del('hc.sess');
+  if (t) api('logout', { t: t }).catch(noop);
+  $('app').hidden = true; $('lock').hidden = false;
+  $('lk-sec').textContent = SEC[S.section].label;
+  $('lk-why').textContent = why || 'Enter the PIN to continue.';
+  $('lk-pin').value = ''; setMsg('lk-msg', '', '');
+  $('lk-pin').focus();
+}
+function doUnlock() {
+  if (S.busy) return;
+  var pin = $('lk-pin').value;
+  if (!/^\d{6}$/.test(pin)) { setMsg('lk-msg', 'Enter the 6-digit PIN.', 'err'); return; }
+  S.busy = true; setMsg('lk-msg', 'Checking…', '');
+  api('login', { section: S.section, pin: pin }).then(function (r) {
+    S.busy = false; $('lk-pin').value = '';
+    if (!r.ok) { setMsg('lk-msg', r.msg || 'Could not unlock.', 'err'); return; }
+    var oldDay = S.today;
+    applyLoginData(r);
+    if (oldDay && r.today !== oldDay) { S.records = {}; S.since = 0; LS.del('hc.cache'); S.pr = null; }
+    if (S.campId) {
+      var c = null; S.camps.forEach(function (x) { if (x.id === S.campId) c = x; });
+      if (!c || (!c.active && S.section !== 'Admin')) { showLogin('That camp is no longer active. Please sign in again.'); return; }
+      S.camp = c;
+    }
+    startSession();
+  }).catch(function () { S.busy = false; setMsg('lk-msg', 'Cannot reach the server. Check the internet and try again.', 'err'); });
+}
+function wipeDevice(msg) {
+  S.records = {}; S.since = 0; S.pr = null; LS.del('hc.cache'); SS.del('hc.sess');
+  var t = S.token; S.token = null;
+  if (t) api('logout', { t: t }).catch(noop);
+  stopPoll(); S.locked = false; S.section = null; S.campId = null; S.camp = null;
+  $('lock').hidden = true; if ($('printlayer')) closePrint();
+  showLogin(msg || '');
+}
+function signOut() {
+  function go() { wipeDevice(''); }
+  if (S.queue.length) {
+    dialog({ title: 'Unsaved records', body: S.queue.length + ' record(s) are not sent yet. If you sign out now they stay on this device and are sent when that section signs in again.\n\nSign out anyway?', yes: 'Sign out', no: 'Stay signed in' }).then(function (y) { if (y) go(); });
+  } else go();
+}
+function checkRollover() {
+  var day = bizKey(), saved = LS.get('hc.day', null);
+  if (saved && saved !== day) {
+    LS.set('hc.day', day);
+    wipeDevice('A new day has started. Please sign in again.');
+    return true;
+  }
+  if (!saved) LS.set('hc.day', day);
+  return false;
+}
+function tick() {
+  if (checkRollover()) return;
+  if (S.token && !S.locked) {
+    if (Date.now() - S.lastAct > S.settings.autoLockMin * 60000) { lockApp('Locked after ' + S.settings.autoLockMin + ' minutes without use.'); return; }
+    persistSession();
+  }
+  renderStatus();
+}
+
+/* ═════════════ wiring ═════════════ */
+function on(id, ev, fn) { $(id).addEventListener(ev, fn); }
+function digitsOnly(id) { on(id, 'input', function () { var e = $(id); var v = e.value.replace(/\D/g, ''); if (v !== e.value) e.value = v; }); }
+function openIfSingle(listFn, openFn) {
+  return function (e) {
+    if (e.key !== 'Enter') return;
+    var l = listFn(); if (l.length === 1) openFn(l[0].rid);
+  };
+}
+
+function bind() {
+  // sign in / camp
+  on('l-secs', 'click', function (e) { var b = e.target.closest('[data-sec]'); if (b) selectSection(b.getAttribute('data-sec')); });
+  on('l-pin', 'input', function () {
+    var v = $('l-pin').value.replace(/\D/g, ''); if (v !== $('l-pin').value) $('l-pin').value = v;
+    $('l-go').disabled = v.length !== 6; if (v.length === 6) doLogin();
+  });
+  on('l-pin', 'keydown', function (e) { if (e.key === 'Enter') doLogin(); });
+  on('l-go', 'click', doLogin);
+  on('k-list', 'click', function (e) {
+    var b = e.target.closest('[data-camp]'); if (!b) return;
+    S.pendingCamp = b.getAttribute('data-camp');
+    var all = $('k-list').querySelectorAll('.camp-tile');
+    for (var i = 0; i < all.length; i++) all[i].setAttribute('aria-pressed', all[i] === b ? 'true' : 'false');
+    $('k-go').disabled = false;
+  });
+  on('k-go', 'click', function () { if (S.pendingCamp) pickCamp(S.pendingCamp); });
+  on('k-back', 'click', function () { wipeDevice(''); });
+
+  // closed-camp view
+  on('v-date', 'change', function () { if ($('v-date').value) { S.viewDate = $('v-date').value; loadView(); } });
+  on('v-reload', 'click', loadView);
+
+  // header
+  on('btn-info', 'click', showInfo);
+  on('btn-lock', 'click', function () { lockApp('Locked. Enter the PIN to continue.'); });
+  on('btn-out', 'click', signOut);
+  on('lk-go', 'click', doUnlock);
+  on('lk-pin', 'input', function () { var v = $('lk-pin').value.replace(/\D/g, ''); if (v !== $('lk-pin').value) $('lk-pin').value = v; if (v.length === 6) doUnlock(); });
+  on('lk-pin', 'keydown', function (e) { if (e.key === 'Enter') doUnlock(); });
+  on('lk-out', 'click', function () { wipeDevice(''); });
+  on('tabs', 'click', function (e) { var b = e.target.closest('[data-tab]'); if (b) showTab(b.getAttribute('data-tab')); });
+
+  // registration
+  digitsOnly('r-mobile');
+  on('r-save', 'click', saveReg);
+  on('r-clear', 'click', clearReg);
+  on('r-cancel', 'click', clearReg);
+  on('r-filter', 'input', renderReg);
+  on('r-tbody', 'click', function (e) { var b = e.target.closest('[data-act="reg-edit"]'); if (b) openRegEdit(b.getAttribute('data-rid')); });
+
+  // nursing
+  on('n-filter', 'input', renderNurse); on('n-status', 'change', renderNurse);
+  on('n-filter', 'keydown', openIfSingle(function () {
+    var q = $('n-filter').value.trim().toLowerCase(), st = $('n-status').value;
+    return recs().filter(function (r) { return matchQ(r, q) && (st === 'registered' ? r.status === 'registered' : st === 'done' ? r.status !== 'registered' : true); });
+  }, openNurse));
+  on('n-tbody', 'click', function (e) { var b = e.target.closest('[data-act="nurse-open"]'); if (b) openNurse(b.getAttribute('data-rid')); });
+  on('n-height', 'input', calcBmi); on('n-weight', 'input', calcBmi);
+  on('n-save', 'click', saveVitals);
+  on('n-clear', 'click', clearNurseFields);
+  on('n-close', 'click', closeNurse);
+
+  // medical officer
+  on('m-filter', 'input', renderMO); on('m-status', 'change', renderMO);
+  on('m-filter', 'keydown', openIfSingle(function () {
+    var q = $('m-filter').value.trim().toLowerCase(), st = $('m-status').value;
+    return recs().filter(function (r) { return (r.status === 'vitals_done' || r.status === 'consultation_done') && matchQ(r, q) && (!st || r.status === st); });
+  }, openMO));
+  on('m-tbody', 'click', function (e) { var b = e.target.closest('[data-act="mo-open"]'); if (b) openMO(b.getAttribute('data-rid')); });
+  on('m-triage', 'click', function (e) { var b = e.target.closest('[data-tri]'); if (b) setTriage(b.getAttribute('data-tri')); });
+  MO_CHECKS.forEach(function (k) { on('m-' + k, 'change', syncChecks); });
+  on('m-save', 'click', saveMO);
+  on('m-print', 'click', function () { var r = S.records[S.moRid]; if (r) printRecords([r]); });
+  on('m-clear', 'click', clearMOFields);
+  on('m-close', 'click', closeMO);
+
+  // print screen
+  on('pr-date', 'change', function () { if (S.pr && $('pr-date').value) { S.pr.dateKey = $('pr-date').value; loadPrint(); } });
+  on('pr-camp', 'change', function () { if (S.pr) { S.pr.campId = $('pr-camp').value; loadPrint(); } });
+  on('pr-status', 'change', renderPrint); on('pr-filter', 'input', renderPrint);
+  on('pr-today', 'click', function () { if (!S.pr) return; S.pr.dateKey = S.today || bizKey(); $('pr-date').value = S.pr.dateKey; loadPrint(); });
+  on('pr-yday', 'click', function () {
+    if (!S.pr) return;
+    var p = (S.today || bizKey()).split('-'), d = new Date(+p[0], +p[1] - 1, +p[2] - 1);
+    S.pr.dateKey = keyOf(d); $('pr-date').value = S.pr.dateKey; loadPrint();
+  });
+  on('pr-reload', 'click', loadPrint);
+  on('pr-selall', 'click', function () {
+    var l = prList(), all = l.length && l.every(function (r) { return S.pr.sel[r.rid]; });
+    l.forEach(function (r) { S.pr.sel[r.rid] = !all; }); renderPrint();
+  });
+  on('pr-sel', 'click', function () { printRecords(prList().filter(function (r) { return S.pr.sel[r.rid]; })); });
+  on('pr-all', 'click', function () { printRecords(prList()); });
+  on('pr-tbody', 'click', function (e) {
+    var b = e.target.closest('[data-act="pr-print"]');
+    if (b) { var rid = b.getAttribute('data-rid'); printRecords(S.pr.records.filter(function (r) { return r.rid === rid; })); }
+  });
+  on('pr-tbody', 'change', function (e) {
+    var c = e.target.closest('[data-act="pr-pick"]');
+    if (c) { S.pr.sel[c.getAttribute('data-rid')] = c.checked; renderPrint(); }
+  });
+  on('pl-print', 'click', function () { var w = $('pl-frame').contentWindow; w.focus(); w.print(); });
+  on('pl-close', 'click', closePrint);
+
+  // activity, visibility, network
+  ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach(function (ev) {
+    document.addEventListener(ev, function () { S.lastAct = Date.now(); }, true);
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) return;
+    tick();
+    if (S.token && !S.locked) syncNow(false);
+  });
+  window.addEventListener('online', function () { if (S.token && !S.locked) syncNow(false); });
+
+  // light deterrent against casual "view source" (real protection is the PIN + no data in this page)
+  document.addEventListener('contextmenu', function (e) {
+    var t = e.target; if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    e.preventDefault();
+  });
+  document.addEventListener('keydown', function (e) {
+    var k = String(e.key || '').toLowerCase();
+    if (e.key === 'F12' || ((e.ctrlKey || e.metaKey) && (k === 'u' || (e.shiftKey && (k === 'i' || k === 'j' || k === 'c'))))) e.preventDefault();
+  }, true);
+}
+
+/* ═════════════ start ═════════════ */
+function boot() {
+  var imgs = document.querySelectorAll('.logo-img');
+  for (var i = 0; i < imgs.length; i++) imgs[i].src = LOGO;
+  bind();
+  checkRollover();
+  S.tickTimer = setInterval(tick, 5000);
+  if (!isConfigured()) { showSetupNeeded(); return; }
+  var sess = SS.get('hc.sess', null);
+  if (sess && sess.token && sess.section && SEC[sess.section] && sess.day === bizKey()) {
+    var idleMs = Date.now() - (sess.lastAct || 0), limit = ((sess.settings && sess.settings.autoLockMin) || 30) * 60000;
+    if (idleMs < limit) {
+      S.token = sess.token; S.section = sess.section; S.campId = sess.campId || null; S.camps = sess.camps || [];
+      S.settings = sess.settings || S.settings; S.today = sess.today || bizKey(); S.serverVersion = sess.serverVersion || '';
+      S.camp = null; S.camps.forEach(function (c) { if (c.id === S.campId) S.camp = c; });
+      S.lastAct = Date.now();
+      if (S.campId && !S.camp) { SS.del('hc.sess'); showLogin(); return; }
+      startSession();
+      return;
+    }
+    SS.del('hc.sess');
+    showLogin('You were signed out after a period without use.');
+    return;
+  }
+  showLogin();
+}
+boot();
+})();
+</script>
+</body>
+</html>
